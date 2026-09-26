@@ -1,0 +1,1667 @@
+{
+  "generated_at": "2026-09-26T18:08:29Z",
+  "tool": "rashomon 0.1.0",
+  "session": "recorded",
+  "n_functions": 9,
+  "personas": [
+    "careful-stylist",
+    "speed-reader",
+    "regex-allergic",
+    "api-historian",
+    "edge-case-hunter"
+  ],
+  "functions": [
+    {
+      "key": "chronex/parsing.py::parse_duration",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 7,
+      "misread_rate": 0.4667,
+      "ci_lo": 0.2481,
+      "ci_hi": 0.6988,
+      "consensus_wrong": 3,
+      "disagreement_mean": 3.333,
+      "disagreement_max": 4,
+      "witnesses_correct": 1,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist"
+      ],
+      "label": "Consensus misread",
+      "verdict": "confusing",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              "1h30m"
+            ],
+            "kwargs": {}
+          },
+          "label": "typical",
+          "actual": "5400",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "5400",
+              "correct": true,
+              "summary": "Splits a compact duration on unit letters and sums seconds."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "90",
+              "correct": false,
+              "summary": "Adds up numbers it finds in a string."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "3600",
+              "correct": false,
+              "summary": "Walks the string, accumulating a total whenever it hits a unit letter."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "'1h30m'",
+              "correct": false,
+              "summary": "Converts a friendly duration string into seconds."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "5400",
+              "correct": true,
+              "summary": "Converts units to seconds; unknown unit letters raise KeyError."
+            }
+          ],
+          "distinct_answers": 4,
+          "wrong": 3
+        },
+        {
+          "input": {
+            "args": [
+              "45s"
+            ],
+            "kwargs": {}
+          },
+          "label": "simple",
+          "actual": "45",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "45",
+              "correct": true,
+              "summary": "Splits a compact duration on unit letters and sums seconds."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "45",
+              "correct": true,
+              "summary": "Adds up numbers it finds in a string."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "0",
+              "correct": false,
+              "summary": "Walks the string, accumulating a total whenever it hits a unit letter."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "45",
+              "correct": true,
+              "summary": "Converts a friendly duration string into seconds."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "45",
+              "correct": true,
+              "summary": "Converts units to seconds; unknown unit letters raise KeyError."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              "2d4h"
+            ],
+            "kwargs": {}
+          },
+          "label": "day-suffix",
+          "actual": "187200",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "187200",
+              "correct": true,
+              "summary": "Splits a compact duration on unit letters and sums seconds."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "14400",
+              "correct": false,
+              "summary": "Adds up numbers it finds in a string."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "187200",
+              "correct": true,
+              "summary": "Walks the string, accumulating a total whenever it hits a unit letter."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "7200",
+              "correct": false,
+              "summary": "Converts a friendly duration string into seconds."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "0",
+              "correct": false,
+              "summary": "Converts units to seconds; unknown unit letters raise KeyError."
+            }
+          ],
+          "distinct_answers": 4,
+          "wrong": 3
+        }
+      ],
+      "path": "chronex/parsing.py",
+      "qualname": "parse_duration",
+      "signature": "parse_duration(text)",
+      "source": "def parse_duration(text):\n    \"\"\"Parse a compact duration such as '1h30m' into whole seconds.\"\"\"\n    units = {\"s\": 1, \"m\": 60, \"h\": 3600, \"d\": 86400}\n    total = 0\n    pending = \"\"\n    for ch in text:\n        if ch.isdigit():\n            pending += ch\n        else:\n            total += int(pending) * units[ch]\n            pending = \"\"\n    return total",
+      "docstring": "Parse a compact duration such as '1h30m' into whole seconds.",
+      "n_lines": 12,
+      "rank": 1,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "e12e3c6b",
+            "subject": "fix: parse_duration ignored the 'd' suffix",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/parsing.py::parse_retry_after",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 4,
+      "misread_rate": 0.2667,
+      "ci_lo": 0.109,
+      "ci_hi": 0.5195,
+      "consensus_wrong": 2,
+      "disagreement_mean": 2.333,
+      "disagreement_max": 3,
+      "witnesses_correct": 1,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              {
+                "Retry-After": "120"
+              }
+            ],
+            "kwargs": {}
+          },
+          "label": "seconds",
+          "actual": "120",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "120",
+              "correct": true,
+              "summary": "Reads Retry-After as delta-seconds, or parses it as an HTTP date."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "120",
+              "correct": true,
+              "summary": "Pulls a wait time out of a response header."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "'120'",
+              "correct": false,
+              "summary": "Returns the header value if it is all digits, otherwise treats it as a date."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "120",
+              "correct": true,
+              "summary": "Standard Retry-After handling: seconds or HTTP-date."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "120",
+              "correct": true,
+              "summary": "Defaults to 0 when the header is absent; clamps negative delays to 0."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              {}
+            ],
+            "kwargs": {}
+          },
+          "label": "header-missing",
+          "actual": "0",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Reads Retry-After as delta-seconds, or parses it as an HTTP date."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Pulls a wait time out of a response header."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Returns the header value if it is all digits, otherwise treats it as a date."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "None",
+              "correct": false,
+              "summary": "Standard Retry-After handling: seconds or HTTP-date."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Defaults to 0 when the header is absent; clamps negative delays to 0."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              {
+                "Retry-After": " 5 "
+              }
+            ],
+            "kwargs": {}
+          },
+          "label": "padded",
+          "actual": "5",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Reads Retry-After as delta-seconds, or parses it as an HTTP date."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "'5 '",
+              "correct": false,
+              "summary": "Pulls a wait time out of a response header."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Returns the header value if it is all digits, otherwise treats it as a date."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Standard Retry-After handling: seconds or HTTP-date."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "ValueError",
+              "correct": false,
+              "summary": "Defaults to 0 when the header is absent; clamps negative delays to 0."
+            }
+          ],
+          "distinct_answers": 3,
+          "wrong": 2
+        }
+      ],
+      "path": "chronex/parsing.py",
+      "qualname": "parse_retry_after",
+      "signature": "parse_retry_after(headers)",
+      "source": "def parse_retry_after(headers):\n    \"\"\"Seconds a client should wait, read from a Retry-After header.\"\"\"\n    raw = str(headers.get(\"Retry-After\", \"0\")).strip()\n    if raw.isdigit():\n        return int(raw)\n    when = parsedate_to_datetime(raw)\n    delta = when - datetime.now(timezone.utc)\n    return max(0, int(delta.total_seconds()))",
+      "docstring": "Seconds a client should wait, read from a Retry-After header.",
+      "n_lines": 8,
+      "rank": 2,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "ebc53336",
+            "subject": "fix: parse_retry_after returned a negative delay",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/seq.py::chunk",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 2,
+      "misread_rate": 0.1333,
+      "ci_lo": 0.0374,
+      "ci_hi": 0.3788,
+      "consensus_wrong": 1,
+      "disagreement_mean": 1.667,
+      "disagreement_max": 2,
+      "witnesses_correct": 3,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "regex-allergic",
+        "api-historian"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              2
+            ],
+            "kwargs": {}
+          },
+          "label": "even-split",
+          "actual": "[[1, 2], [3, 4], [5]]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[[1, 2], [3, 4], [5]]",
+              "correct": true,
+              "summary": "Slices the sequence into blocks of `size` from index 0."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[[1, 2], [3, 4], [5]]",
+              "correct": true,
+              "summary": "Groups a list into fixed-size batches."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[[1, 2], [3, 4], [5]]",
+              "correct": true,
+              "summary": "Raises ValueError when size is not positive, then steps through by size."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[[1, 2], [3, 4], [5]]",
+              "correct": true,
+              "summary": "Typical batching helper."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "[[1, 2], [3, 4], [5]]",
+              "correct": true,
+              "summary": "A final short block is kept; size > length yields one block."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              [],
+              3
+            ],
+            "kwargs": {}
+          },
+          "label": "empty",
+          "actual": "[]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Slices the sequence into blocks of `size` from index 0."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Groups a list into fixed-size batches."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Raises ValueError when size is not positive, then steps through by size."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Typical batching helper."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "None",
+              "correct": false,
+              "summary": "A final short block is kept; size > length yields one block."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              [
+                1,
+                2,
+                3
+              ],
+              10
+            ],
+            "kwargs": {}
+          },
+          "label": "size>len",
+          "actual": "[[1, 2, 3]]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[[1, 2, 3]]",
+              "correct": true,
+              "summary": "Slices the sequence into blocks of `size` from index 0."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[]",
+              "correct": false,
+              "summary": "Groups a list into fixed-size batches."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[[1, 2, 3]]",
+              "correct": true,
+              "summary": "Raises ValueError when size is not positive, then steps through by size."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[[1, 2, 3]]",
+              "correct": true,
+              "summary": "Typical batching helper."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "[[1, 2, 3]]",
+              "correct": true,
+              "summary": "A final short block is kept; size > length yields one block."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        }
+      ],
+      "path": "chronex/seq.py",
+      "qualname": "chunk",
+      "signature": "chunk(seq, size)",
+      "source": "def chunk(seq, size):\n    \"\"\"Split a sequence into consecutive blocks of `size`.\"\"\"\n    if size <= 0:\n        raise ValueError(\"size must be positive\")\n    out = []\n    for i in range(0, len(seq), size):\n        out.append(seq[i:i + size])\n    return out",
+      "docstring": "Split a sequence into consecutive blocks of `size`.",
+      "n_lines": 8,
+      "rank": 3,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "0825a4d8",
+            "subject": "fix: chunk blew the stack on size=0",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/seq.py::flatten",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 2,
+      "misread_rate": 0.1333,
+      "ci_lo": 0.0374,
+      "ci_hi": 0.3788,
+      "consensus_wrong": 2,
+      "disagreement_mean": 1.333,
+      "disagreement_max": 2,
+      "witnesses_correct": 3,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "api-historian",
+        "edge-case-hunter"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              [
+                [
+                  1,
+                  [
+                    2,
+                    [
+                      3
+                    ]
+                  ]
+                ],
+                4
+              ]
+            ],
+            "kwargs": {}
+          },
+          "label": "deep",
+          "actual": "[1, 2, 3, 4]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[1, 2, 3, 4]",
+              "correct": true,
+              "summary": "Recurses through nested lists and extends a flat result."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[1, 2, 3, 4]",
+              "correct": true,
+              "summary": "Unwraps nested lists."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[1, 2, 3, 4]",
+              "correct": true,
+              "summary": "Appends leaves, recursing only when the item is itself a list."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[1, 2, 3, 4]",
+              "correct": true,
+              "summary": "Classic recursive flatten."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "[1, 2, 3, 4]",
+              "correct": true,
+              "summary": "Empty input gives []; strings stay as single elements."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "label": "empty",
+          "actual": "[]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Recurses through nested lists and extends a flat result."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Unwraps nested lists."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Appends leaves, recursing only when the item is itself a list."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Classic recursive flatten."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Empty input gives []; strings stay as single elements."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              [
+                "ab",
+                [
+                  "cd"
+                ]
+              ]
+            ],
+            "kwargs": {}
+          },
+          "label": "strings",
+          "actual": "['ab', 'cd']",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "['ab', 'cd']",
+              "correct": true,
+              "summary": "Recurses through nested lists and extends a flat result."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "['a', 'b', 'c', 'd']",
+              "correct": false,
+              "summary": "Unwraps nested lists."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "['a', 'b', 'c', 'd']",
+              "correct": false,
+              "summary": "Appends leaves, recursing only when the item is itself a list."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "['ab', 'cd']",
+              "correct": true,
+              "summary": "Classic recursive flatten."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "['ab', 'cd']",
+              "correct": true,
+              "summary": "Empty input gives []; strings stay as single elements."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 2
+        }
+      ],
+      "path": "chronex/seq.py",
+      "qualname": "flatten",
+      "signature": "flatten(nested)",
+      "source": "def flatten(nested):\n    \"\"\"Flatten arbitrarily nested lists into a single list.\"\"\"\n    out = []\n    for item in nested:\n        if isinstance(item, list):\n            out.extend(flatten(item))\n        else:\n            out.append(item)\n    return out",
+      "docstring": "Flatten arbitrarily nested lists into a single list.",
+      "n_lines": 9,
+      "rank": 4,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "d7984a58",
+            "subject": "fix: flatten recursed into strings",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/seq.py::merge_intervals",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 2,
+      "misread_rate": 0.1333,
+      "ci_lo": 0.0374,
+      "ci_hi": 0.3788,
+      "consensus_wrong": 1,
+      "disagreement_mean": 1.667,
+      "disagreement_max": 2,
+      "witnesses_correct": 3,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "regex-allergic",
+        "api-historian"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              [
+                [
+                  1,
+                  3
+                ],
+                [
+                  2,
+                  6
+                ],
+                [
+                  8,
+                  10
+                ],
+                [
+                  15,
+                  18
+                ]
+              ]
+            ],
+            "kwargs": {}
+          },
+          "label": "overlap",
+          "actual": "[(1, 6), (8, 10), (15, 18)]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[(1, 6), (8, 10), (15, 18)]",
+              "correct": true,
+              "summary": "Sorts intervals, merges any that overlap or touch, and returns tuples."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[(1, 6), (8, 10), (15, 18)]",
+              "correct": true,
+              "summary": "Combines overlapping ranges."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[(1, 6), (8, 10), (15, 18)]",
+              "correct": true,
+              "summary": "Accumulates into a list of lists, merging when the next start is <= the current end."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[(1, 6), (8, 10), (15, 18)]",
+              "correct": true,
+              "summary": "Interval merging as usually written."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "[(1, 6), (8, 10), (15, 18)]",
+              "correct": true,
+              "summary": "Empty input returns []; adjacency counts as overlap."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "label": "empty",
+          "actual": "[]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Sorts intervals, merges any that overlap or touch, and returns tuples."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Combines overlapping ranges."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Accumulates into a list of lists, merging when the next start is <= the current end."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[]",
+              "correct": true,
+              "summary": "Interval merging as usually written."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "None",
+              "correct": false,
+              "summary": "Empty input returns []; adjacency counts as overlap."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              [
+                [
+                  1,
+                  2
+                ],
+                [
+                  2,
+                  3
+                ],
+                [
+                  4,
+                  5
+                ]
+              ]
+            ],
+            "kwargs": {}
+          },
+          "label": "adjacent",
+          "actual": "[(1, 3), (4, 5)]",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "[(1, 3), (4, 5)]",
+              "correct": true,
+              "summary": "Sorts intervals, merges any that overlap or touch, and returns tuples."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "[(1, 2), (2, 3), (4, 5)]",
+              "correct": false,
+              "summary": "Combines overlapping ranges."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "[(1, 3), (4, 5)]",
+              "correct": true,
+              "summary": "Accumulates into a list of lists, merging when the next start is <= the current end."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "[(1, 3), (4, 5)]",
+              "correct": true,
+              "summary": "Interval merging as usually written."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "[(1, 3), (4, 5)]",
+              "correct": true,
+              "summary": "Empty input returns []; adjacency counts as overlap."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        }
+      ],
+      "path": "chronex/seq.py",
+      "qualname": "merge_intervals",
+      "signature": "merge_intervals(intervals)",
+      "source": "def merge_intervals(intervals):\n    \"\"\"Merge overlapping [start, end] intervals.\"\"\"\n    if not intervals:\n        return []\n    ordered = sorted(intervals)\n    merged = [list(ordered[0])]\n    for start, end in ordered[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return [tuple(pair) for pair in merged]",
+      "docstring": "Merge overlapping [start, end] intervals.",
+      "n_lines": 12,
+      "rank": 5,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "34f4416a",
+            "subject": "fix: merge_intervals split adjacent ranges",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/text.py::slugify",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 2,
+      "misread_rate": 0.1333,
+      "ci_lo": 0.0374,
+      "ci_hi": 0.3788,
+      "consensus_wrong": 1,
+      "disagreement_mean": 1.667,
+      "disagreement_max": 2,
+      "witnesses_correct": 3,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "regex-allergic",
+        "edge-case-hunter"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              "Hello, World!"
+            ],
+            "kwargs": {}
+          },
+          "label": "punctuation",
+          "actual": "'hello-world'",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "'hello-world'",
+              "correct": true,
+              "summary": "Lowercases, keeps alphanumerics, and joins runs with single dashes."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "'hello-world'",
+              "correct": true,
+              "summary": "Turns text into a url slug."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "'hello-world'",
+              "correct": true,
+              "summary": "Emits a dash for every non-alphanumeric character."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "'hello_world'",
+              "correct": false,
+              "summary": "Classic slugify: lowercase, strip, dash-separate."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "'hello-world'",
+              "correct": true,
+              "summary": "Collapses runs of separators and strips leading/trailing dashes."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              "  a  --  b  "
+            ],
+            "kwargs": {}
+          },
+          "label": "repeats",
+          "actual": "'a-b'",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "'a-b'",
+              "correct": true,
+              "summary": "Lowercases, keeps alphanumerics, and joins runs with single dashes."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "'a--b'",
+              "correct": false,
+              "summary": "Turns text into a url slug."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "'a-b'",
+              "correct": true,
+              "summary": "Emits a dash for every non-alphanumeric character."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "'a-b'",
+              "correct": true,
+              "summary": "Classic slugify: lowercase, strip, dash-separate."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "'a-b'",
+              "correct": true,
+              "summary": "Collapses runs of separators and strips leading/trailing dashes."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              "Ünïcode 42"
+            ],
+            "kwargs": {}
+          },
+          "label": "unicode",
+          "actual": "'ünïcode-42'",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "'ünïcode-42'",
+              "correct": true,
+              "summary": "Lowercases, keeps alphanumerics, and joins runs with single dashes."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "'ünïcode-42'",
+              "correct": true,
+              "summary": "Turns text into a url slug."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "'ünïcode-42'",
+              "correct": true,
+              "summary": "Emits a dash for every non-alphanumeric character."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "'ünïcode-42'",
+              "correct": true,
+              "summary": "Classic slugify: lowercase, strip, dash-separate."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "'ünïcode-42'",
+              "correct": true,
+              "summary": "Collapses runs of separators and strips leading/trailing dashes."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        }
+      ],
+      "path": "chronex/text.py",
+      "qualname": "slugify",
+      "signature": "slugify(text)",
+      "source": "def slugify(text):\n    \"\"\"Turn arbitrary text into a url-safe slug.\"\"\"\n    out = []\n    for ch in text.lower():\n        if ch.isalnum():\n            out.append(ch)\n        else:\n            if out and out[-1] != \"-\":\n                out.append(\"-\")\n    return \"\".join(out).strip(\"-\")",
+      "docstring": "Turn arbitrary text into a url-safe slug.",
+      "n_lines": 10,
+      "rank": 6,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "dddce92c",
+            "subject": "fix: slugify produced repeated dashes",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/num.py::clamp",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 1,
+      "misread_rate": 0.0667,
+      "ci_lo": 0.0119,
+      "ci_hi": 0.2982,
+      "consensus_wrong": 1,
+      "disagreement_mean": 1.333,
+      "disagreement_max": 2,
+      "witnesses_correct": 4,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "regex-allergic",
+        "api-historian",
+        "edge-case-hunter"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              5,
+              0,
+              10
+            ],
+            "kwargs": {}
+          },
+          "label": "inside",
+          "actual": "5",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Bounds a value with max(low, min(high, value))."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Keeps a number inside a range."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Clamps to the range, and rejects an inverted range."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Standard clamp."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "5",
+              "correct": true,
+              "summary": "Inclusive at both ends."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              -3,
+              0,
+              10
+            ],
+            "kwargs": {}
+          },
+          "label": "below",
+          "actual": "0",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Bounds a value with max(low, min(high, value))."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "-3",
+              "correct": false,
+              "summary": "Keeps a number inside a range."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Clamps to the range, and rejects an inverted range."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Standard clamp."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "0",
+              "correct": true,
+              "summary": "Inclusive at both ends."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              99,
+              0,
+              10
+            ],
+            "kwargs": {}
+          },
+          "label": "above",
+          "actual": "10",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "10",
+              "correct": true,
+              "summary": "Bounds a value with max(low, min(high, value))."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "10",
+              "correct": true,
+              "summary": "Keeps a number inside a range."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "10",
+              "correct": true,
+              "summary": "Clamps to the range, and rejects an inverted range."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "10",
+              "correct": true,
+              "summary": "Standard clamp."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "10",
+              "correct": true,
+              "summary": "Inclusive at both ends."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        }
+      ],
+      "path": "chronex/num.py",
+      "qualname": "clamp",
+      "signature": "clamp(value, low, high)",
+      "source": "def clamp(value, low, high):\n    \"\"\"Force a value into the inclusive range [low, high].\"\"\"\n    return max(low, min(high, value))",
+      "docstring": "Force a value into the inclusive range [low, high].",
+      "n_lines": 3,
+      "rank": 7,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "26bffd88",
+            "subject": "fix: clamp ignored the lower bound",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/text.py::is_palindrome",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 1,
+      "misread_rate": 0.0667,
+      "ci_lo": 0.0119,
+      "ci_hi": 0.2982,
+      "consensus_wrong": 1,
+      "disagreement_mean": 1.333,
+      "disagreement_max": 2,
+      "witnesses_correct": 4,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "regex-allergic",
+        "api-historian",
+        "edge-case-hunter"
+      ],
+      "label": "Scattered",
+      "verdict": "scattered",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              "A man, a plan, a canal: Panama"
+            ],
+            "kwargs": {}
+          },
+          "label": "punctuated",
+          "actual": "True",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Compares the lowercased string with its reverse."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "False",
+              "correct": false,
+              "summary": "Checks a string against its reverse."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Strips everything but letters and digits first, then compares reversed."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Palindrome test ignoring case and punctuation."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Empty and single-character inputs trivially return True."
+            }
+          ],
+          "distinct_answers": 2,
+          "wrong": 1
+        },
+        {
+          "input": {
+            "args": [
+              "racecar"
+            ],
+            "kwargs": {}
+          },
+          "label": "plain",
+          "actual": "True",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Compares the lowercased string with its reverse."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Checks a string against its reverse."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Strips everything but letters and digits first, then compares reversed."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Palindrome test ignoring case and punctuation."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Empty and single-character inputs trivially return True."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              "Was it a car or a cat I saw?"
+            ],
+            "kwargs": {}
+          },
+          "label": "question",
+          "actual": "True",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Compares the lowercased string with its reverse."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Checks a string against its reverse."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Strips everything but letters and digits first, then compares reversed."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Palindrome test ignoring case and punctuation."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "True",
+              "correct": true,
+              "summary": "Empty and single-character inputs trivially return True."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        }
+      ],
+      "path": "chronex/text.py",
+      "qualname": "is_palindrome",
+      "signature": "is_palindrome(text)",
+      "source": "def is_palindrome(text):\n    \"\"\"True when the text reads the same forwards and backwards.\"\"\"\n    clean = [ch for ch in text.lower() if ch.isalnum()]\n    return clean == clean[::-1]",
+      "docstring": "True when the text reads the same forwards and backwards.",
+      "n_lines": 4,
+      "rank": 8,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "4101cc2d",
+            "subject": "fix: is_palindrome choked on punctuation",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    },
+    {
+      "key": "chronex/num.py::mean",
+      "n_probes": 3,
+      "n_witnesses": 5,
+      "predictions": 15,
+      "misreads": 0,
+      "misread_rate": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.2039,
+      "consensus_wrong": 0,
+      "disagreement_mean": 1.0,
+      "disagreement_max": 1,
+      "witnesses_correct": 5,
+      "witnesses_correct_of": 5,
+      "witnesses_clean": [
+        "careful-stylist",
+        "speed-reader",
+        "regex-allergic",
+        "api-historian",
+        "edge-case-hunter"
+      ],
+      "label": "Clear",
+      "verdict": "clear",
+      "probes": [
+        {
+          "input": {
+            "args": [
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ],
+            "kwargs": {}
+          },
+          "label": "typical",
+          "actual": "2.5",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "2.5",
+              "correct": true,
+              "summary": "Sums values and divides by the count; empty input returns 0.0."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "2.5",
+              "correct": true,
+              "summary": "Averages a list."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "2.5",
+              "correct": true,
+              "summary": "Returns 0.0 for an empty list, otherwise sum/len."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "2.5",
+              "correct": true,
+              "summary": "Arithmetic mean."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "2.5",
+              "correct": true,
+              "summary": "Guarded against ZeroDivisionError."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              []
+            ],
+            "kwargs": {}
+          },
+          "label": "empty",
+          "actual": "0.0",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "0.0",
+              "correct": true,
+              "summary": "Sums values and divides by the count; empty input returns 0.0."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "0.0",
+              "correct": true,
+              "summary": "Averages a list."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "0.0",
+              "correct": true,
+              "summary": "Returns 0.0 for an empty list, otherwise sum/len."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "0.0",
+              "correct": true,
+              "summary": "Arithmetic mean."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "0.0",
+              "correct": true,
+              "summary": "Guarded against ZeroDivisionError."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        },
+        {
+          "input": {
+            "args": [
+              [
+                0.5,
+                1.5
+              ]
+            ],
+            "kwargs": {}
+          },
+          "label": "floats",
+          "actual": "1.0",
+          "cards": [
+            {
+              "witness": "careful-stylist",
+              "prediction": "1.0",
+              "correct": true,
+              "summary": "Sums values and divides by the count; empty input returns 0.0."
+            },
+            {
+              "witness": "speed-reader",
+              "prediction": "1.0",
+              "correct": true,
+              "summary": "Averages a list."
+            },
+            {
+              "witness": "regex-allergic",
+              "prediction": "1.0",
+              "correct": true,
+              "summary": "Returns 0.0 for an empty list, otherwise sum/len."
+            },
+            {
+              "witness": "api-historian",
+              "prediction": "1.0",
+              "correct": true,
+              "summary": "Arithmetic mean."
+            },
+            {
+              "witness": "edge-case-hunter",
+              "prediction": "1.0",
+              "correct": true,
+              "summary": "Guarded against ZeroDivisionError."
+            }
+          ],
+          "distinct_answers": 1,
+          "wrong": 0
+        }
+      ],
+      "path": "chronex/num.py",
+      "qualname": "mean",
+      "signature": "mean(values)",
+      "source": "def mean(values):\n    \"\"\"Arithmetic mean of a list of numbers.\"\"\"\n    if not values:\n        return 0.0\n    return sum(values) / len(values)",
+      "docstring": "Arithmetic mean of a list of numbers.",
+      "n_lines": 5,
+      "rank": 9,
+      "history": {
+        "touching_commits": 2,
+        "bug_fixes": 1,
+        "last_fix": "2026-09-26",
+        "fix_commits": [
+          {
+            "sha": "f642be1c",
+            "subject": "fix: mean raised ZeroDivisionError on empty input",
+            "date": "2026-09-26"
+          }
+        ]
+      }
+    }
+  ]
+}

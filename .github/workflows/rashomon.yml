@@ -1,0 +1,108 @@
+name: rashomon
+
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - ".github/workflows/rashomon.yml"
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    # run on every Python PR, or when someone types "/rashomon" on a PR
+    if: github.event_name == 'pull_request' || (github.event.issue.pull_request && contains(github.event.comment.body, '/rashomon'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve the PR number and base ref
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "pr=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "base=${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "pr=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+            echo "base=${{ github.event.issue.base.ref }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pick the functions this PR touched
+        run: |
+          python -m rashomon.cli pick \
+            --root . --out rashomon_out \
+            --diff-base "origin/${{ steps.meta.outputs.base }}" \
+            --limit 20 --max-lines 60
+
+      - name: Probe them
+        if: ${{ hashFiles('rashomon_out/functions.json') != '' }}
+        run: python -m rashomon.cli probes --root . --out rashomon_out --backend heuristic
+
+      - name: Five witnesses
+        if: ${{ hashFiles('rashomon_out/probes.json') != '' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            python -m rashomon.cli witness --root . --out rashomon_out --backend llm
+          else
+            echo "::warning::no ANTHROPIC_API_KEY secret - skipping the witness step"
+          fi
+
+      - name: Score
+        if: ${{ hashFiles('rashomon_out/probes.json') != '' }}
+        run: |
+          if [ -f rashomon_out/witnesses.json ]; then
+            python -m rashomon.cli score --root . --out rashomon_out
+          fi
+
+      - name: Gate
+        if: ${{ hashFiles('rashomon_out/results.json') != '' }}
+        run: |
+          python -m rashomon.cli history --root . --out rashomon_out || true
+          python -m rashomon.cli gate --root . --out rashomon_out \
+            --comment-file rashomon_out/comment.md --fail-on-regression
+
+      - name: Comment on the PR
+        if: ${{ hashFiles('rashomon_out/comment.md') != '' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('rashomon_out/comment.md', 'utf8');
+            const marker = '## Rashomon readability gate';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      - name: Upload the run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rashomon-out
+          path: rashomon_out/
+          if-no-files-found: ignore

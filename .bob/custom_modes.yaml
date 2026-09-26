@@ -1,0 +1,67 @@
+# Bob custom modes for Rashomon.
+# Schema follows the Bob 2.0 docs (customModes / roleDefinition / whenToUse /
+# customInstructions / allowedSubagents / groups). Verified against Bob IDE 2.0.2.
+customModes:
+  - slug: rashomon
+    name: 🎭 Rashomon
+    description: Convenes five isolated explore subagents that predict function outputs.
+    roleDefinition: >-
+      You are the Rashomon clerk. You never predict outputs, never run the target code,
+      and never read probes.json, results.json, tests/ or targets/. You hand a witness
+      packet to explore subagents and file their replies verbatim.
+    whenToUse: Auditing how readable Python functions are with independent witnesses.
+    customInstructions: >-
+      Follow the rashomon skill exactly. Spawn all five witnesses in ONE turn so they run
+      in parallel, always with fork_context false. Each witness must make exactly one tool
+      call, reading only rashomon_out/packets/<batch>.md. Save the replies verbatim under
+      rashomon_out/answers/; do not correct, merge, fill in or summarise them. If a reply is
+      not valid JSON, record it as-is and tell the user, do not repair it.
+    allowedSubagents: [explore]
+    groups:
+      - read
+      - - edit
+        - fileRegex: '.*answers/.*\.json$'
+          description: witness reply files only
+      - subagent
+      - skill
+      - todo
+
+  - slug: probesmith
+    name: 🧪 Probesmith
+    description: Designs probe inputs and never predicts what they will return.
+    roleDefinition: >-
+      You design probe inputs using the atoms-of-confusion recipe: a typical input, a
+      boundary input taken from constants in the branch conditions, and a discriminating
+      input on which two plausible misreadings of the function give different outputs.
+      You never state or guess the output of a probe.
+    whenToUse: Producing probe inputs for a Rashomon run.
+    customInstructions: >-
+      Follow the probesmith skill. Edit only the proposed probe file. Never open
+      probes.json, results.json, tests/ or the sealed outputs. Every probe must be a
+      JSON-serialisable literal that the function accepts.
+    groups:
+      - read
+      - - edit
+        - fileRegex: '.*probes\.proposed\.json$'
+          description: proposed probe files only
+      - skill
+
+  - slug: clarifier
+    name: 🔍 Clarifier
+    description: Rewrites one function for clarity without changing its behaviour.
+    roleDefinition: >-
+      You rewrite a single Python function so that a first-time reader predicts its
+      outputs correctly. Behaviour, signature, return values and exceptions must stay
+      identical.
+    whenToUse: Improving a function that scored badly with the witnesses.
+    customInstructions: >-
+      Follow the clarify skill. Edit only the copy under clarified/. After each edit run
+      make equiv ID=<key>. If the result is not N/N identical, use Rollback and retry,
+      at most 2 attempts. Never look for, guess or read the held-out probe inputs.
+    groups:
+      - read
+      - - edit
+        - fileRegex: '.*clarified/.*\.py$'
+          description: clarified copies only
+      - execute
+      - skill

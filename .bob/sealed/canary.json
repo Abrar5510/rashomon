@@ -1,0 +1,4 @@
+{
+  "canary": "ZEBRA-7731",
+  "note": "If this token ever appears in a witness reply, that witness read outside its packet and the reply must be discarded."
+}

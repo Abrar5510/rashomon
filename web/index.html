@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rashomon — readability leaderboard</title>
+<link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Rashomon</h1>
+    <p class="tag">Five independent readers predict what your function returns. Then we run it.
+      Disagreement is a number, not an opinion.</p>
+    <p class="meta" id="meta"></p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls">
+    <input id="search" type="search" placeholder="filter by name or file…" />
+    <div class="sorts" id="sorts">
+      <button data-sort="misread_rate" class="on">misread rate</button>
+      <button data-sort="disagreement_mean">disagreement</button>
+      <button data-sort="bug_fixes">bug fixes</button>
+      <button data-sort="key">name</button>
+    </div>
+  </section>
+
+  <section class="chart-card">
+    <h2>Do the most misread functions have the most bug fixes?</h2>
+    <div id="chart"></div>
+    <p class="foot" id="corr"></p>
+  </section>
+
+  <section id="list"></section>
+
+  <section class="empty" id="empty" hidden>No functions match.</section>
+</main>
+
+<div class="drawer-backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="witness cards"></aside>
+
+<footer class="wrap">
+  <p id="foot"></p>
+</footer>
+
+<script src="./common.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

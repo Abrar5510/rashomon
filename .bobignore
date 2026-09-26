@@ -1,0 +1,29 @@
+# Files Bob is not allowed to read. Witnesses must not see the answers.
+#
+# The isolation story: a witness only ever gets rashomon_out/packets/<batch>.md.
+# These entries make that structural, not just a promise in the prompt.
+
+# the code under test and everything that could leak its behaviour
+targets/
+out/
+demo/target_repo/tests/
+
+# the sealed outputs, the scored results and the recorded session
+rashomon_out/probes.json
+rashomon_out/results.json
+rashomon_out/history.json
+rashomon_out/witnesses.json
+rashomon_out/clarified_out/
+rashomon_out/*.json
+rashomon_out/sealed/
+rashomon_out/lifted/
+
+# published answers
+web/data.json
+
+# the canary used to prove witnesses never read outside their packet
+.bob/sealed/
+
+node_modules/
+__pycache__/
+*.pyc
