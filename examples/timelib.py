@@ -3,22 +3,20 @@
 
 def parse_duration(text: str) -> int:
     """Parse a duration like '1h30m' into whole seconds."""
-    weights = {"h": 3600, "m": 60, "s": 1}
-    seconds = 0
-    digits = ""
+    minutes = 0
+    units = {"h": 3600, "m": 60, "s": 1}
+    pending = ""
     for ch in text:
         if ch.isdigit():
-            digits += ch
-        elif ch in weights and digits:
-            seconds += int(digits) * weights[ch]
-            digits = ""
-    if digits:
-        seconds += int(digits)
-    return seconds
+            pending += ch
+        elif ch in units and pending:
+            minutes = minutes + int(pending) * units[ch]
+            pending = ""
+    return minutes
 
 
 def clamp(value: float, low: float, high: float) -> float:
-    """Clamp value into the inclusive range [low, high]."""
+    """Clamp value into the closed interval [low, high]; both bounds are inclusive."""
     if value < low:
         return low
     if value > high:
