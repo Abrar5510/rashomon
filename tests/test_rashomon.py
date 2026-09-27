@@ -541,3 +541,56 @@ def test_score_reports_interval_consensus_and_label():
     assert res["label"] == "Consensus misread"
     assert res["verdict"] == "confusing"
     assert res["probes"][0]["wrong"] == 5
+
+
+# ------------------------------------------------- live witness checkpoints
+
+def _wf(key, name):
+    return FunctionInfo(name=name, qualname=name, path="m.py", module="m",
+                        start=1, end=2, source=f"def {name}(x):\n    return x\n",
+                        signature=f"{name}(x)", key=key)
+
+
+class _FakeLLM:
+    def __init__(self, fail=False):
+        self.fail = fail
+        self.calls = 0
+
+    def complete(self, system, user):
+        self.calls += 1
+        if self.fail:
+            raise RuntimeError("quota exhausted")
+        return '{"summary": "s", "predictions": ["1", "2"]}'
+
+
+def test_witness_checkpoint_resumes_without_rerunning_done_functions(tmp_path):
+    from rashomon.witnesses import run_witnesses
+
+    ck = tmp_path / "witnesses.json"
+    personas = ["w1", "w2", "w3", "w4", "w5"]
+    done = {"0": dict.fromkeys(personas, "1"), "1": dict.fromkeys(personas, "1")}
+    ck.write_text(json.dumps({"m.py::a": done, "__summaries__": {"m.py::a": {}}}), encoding="utf-8")
+
+    probes = {k: {"probes": [{"args": [0], "ok": True}, {"args": [1], "ok": True}]}
+              for k in ("m.py::a", "m.py::b")}
+    llm = _FakeLLM()
+    out = run_witnesses([_wf("m.py::a", "a"), _wf("m.py::b", "b")], probes,
+                        backend="llm", llm=llm, personas=personas, checkpoint=str(ck))
+    assert llm.calls == 5                       # only b was answered live
+    assert out["m.py::a"]["0"]["w1"] == "1"     # a resumed from the checkpoint
+    assert out["m.py::b"]["0"]["w1"] == "1"
+
+
+def test_witness_checkpoint_aborts_after_consecutive_failures(tmp_path):
+    from rashomon.witnesses import run_witnesses
+
+    ck = tmp_path / "witnesses.json"
+    personas = ["w1", "w2", "w3", "w4", "w5"]
+    probes = {k: {"probes": [{"args": [0], "ok": True}]} for k in ("m.py::a", "m.py::b")}
+    llm = _FakeLLM(fail=True)
+    with pytest.raises(ValueError, match="consecutive"):
+        run_witnesses([_wf("m.py::a", "a"), _wf("m.py::b", "b")], probes,
+                      backend="llm", llm=llm, personas=personas, checkpoint=str(ck))
+    assert ck.exists()                          # partial progress survived
+    saved = json.loads(ck.read_text(encoding="utf-8"))
+    assert "m.py::a" in saved                   # a was written before the abort

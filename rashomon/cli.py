@@ -374,6 +374,16 @@ def cmd_witness(args) -> int:
     llm = None
     if args.backend == "llm":
         llm = LLMBackend(provider=args.provider, model=args.model, temperature=args.temperature)
+    out_dir = _sub_out(args)
+    write_json(
+        os.path.join(out_dir, "session.json"),
+        {
+            "backend": args.backend,
+            "provider": args.provider if llm is None else llm.provider,
+            "model": llm.model if llm is not None else getattr(args, "model", None),
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        },
+    )
     try:
         answers = run_witnesses(
             _wrap(fns),
@@ -381,14 +391,15 @@ def cmd_witness(args) -> int:
             backend=args.backend,
             source_path=args.witness_file,
             llm=llm,
+            checkpoint=os.path.join(out_dir, "witnesses.json") if args.backend == "llm" else None,
         )
     except (BackendUnavailable, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
-    write_json(os.path.join(_sub_out(args), "witnesses.json"), answers)
+    write_json(os.path.join(out_dir, "witnesses.json"), answers)
     n = sum(len(v) for k, v in answers.items() if k != "__summaries__")
     print(f"witness answers for {len([k for k in answers if k != '__summaries__'])} "
-          f"functions ({n} probe slots) -> {os.path.join(_sub_out(args), 'witnesses.json')}")
+          f"functions ({n} probe slots) -> {os.path.join(out_dir, 'witnesses.json')}")
     return 0
 
 
@@ -493,10 +504,19 @@ def _merged(args) -> list[dict]:
 
 def cmd_leaderboard(args) -> int:
     rows = _merged(args)
+    session = getattr(args, "session", None)
+    if session is None:
+        sidecar = _out(args, "session.json")
+        if os.path.exists(sidecar):
+            backend = read_json(sidecar).get("backend")
+            if backend == "file":
+                session = "recorded"
+            elif backend == "llm":
+                session = "live"
     payload = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "tool": f"rashomon {__version__}",
-        "session": getattr(args, "session", None),
+        "session": session,
         "n_functions": len(rows),
         "personas": WITNESS_PERSONAS,
         "functions": rows,
@@ -800,7 +820,12 @@ def cmd_runall(args) -> int:
 
     backend = getattr(args, "backend", "auto")
     if backend == "auto":
-        has_key = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("OPENAI_API_KEY"))
+        has_key = bool(
+            os.environ.get("ANTHROPIC_API_KEY")
+            or os.environ.get("OPENAI_API_KEY")
+            or os.environ.get("GOOGLE_API_KEY")
+            or os.environ.get("GEMINI_API_KEY")
+        )
         backend = "llm" if has_key else "heuristic"
         print(f"backend auto -> {backend}")
 
@@ -887,7 +912,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = add("probes", cmd_probes, help="generate and execute probe inputs")
     sp.add_argument("--backend", default="heuristic", choices=["heuristic", "llm", "file"])
-    sp.add_argument("--provider", default="anthropic")
+    sp.add_argument("--provider", default="auto",
+                    help="anthropic | openai | gemini | auto (first key found in the env)")
     sp.add_argument("--model")
     sp.add_argument("--probes-file", help="recorded probes JSON for --backend file")
     sp.add_argument("--timeout", type=float, default=10.0)
@@ -912,7 +938,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = add("witness", cmd_witness, help="ask 5 independent readers to predict outputs")
     sp.add_argument("--backend", default="llm", choices=["llm", "file"])
-    sp.add_argument("--provider", default="anthropic")
+    sp.add_argument("--provider", default="auto",
+                    help="anthropic | openai | gemini | auto (first key found in the env)")
     sp.add_argument("--model")
     sp.add_argument("--temperature", type=float, default=0.0)
     sp.add_argument("--witness-file", help="recorded witness answers for --backend file")
@@ -970,7 +997,8 @@ def build_parser() -> argparse.ArgumentParser:
     ra.add_argument("--recorded-dir", help="directory holding probes.json + witnesses.json")
     ra.add_argument("--probes-file")
     ra.add_argument("--witness-file")
-    ra.add_argument("--provider", default="anthropic")
+    ra.add_argument("--provider", default="auto",
+                    help="anthropic | openai | gemini | auto (first key found in the env)")
     ra.add_argument("--model")
     ra.add_argument("--temperature", type=float, default=0.0)
     ra.add_argument("--timeout", type=float, default=10.0)

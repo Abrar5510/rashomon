@@ -105,7 +105,7 @@ def main_cli() -> int:
     p.add_argument("--witness-backend", default=None, choices=["llm", "file"])
     p.add_argument("--probes-file")
     p.add_argument("--witness-file")
-    p.add_argument("--provider", default="anthropic")
+    p.add_argument("--provider", default="auto")
     p.add_argument("--model")
     p.add_argument("--sealed", action="store_true",
                    help="re-measure on the frozen held-out probes P' (needs live witnesses)")

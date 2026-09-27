@@ -56,8 +56,14 @@ def run_witnesses(
     source_path: str | None = None,
     llm: LLMBackend | None = None,
     personas: list[str] | None = None,
+    checkpoint: str | None = None,
 ) -> dict:
-    """Return {key: {probe_idx: {persona: prediction}}}."""
+    """Return {key: {probe_idx: {persona: prediction}}}.
+
+    checkpoint: for backend=llm, a JSON path rewritten after every function so
+    an interrupted run (quota, Ctrl-C) keeps its progress and a rerun resumes
+    from the completed functions instead of starting over.
+    """
     personas = personas or WITNESS_PERSONAS
 
     if backend == "file":
@@ -81,12 +87,40 @@ def run_witnesses(
     if backend == "llm":
         if llm is None:
             raise ValueError("backend=llm requires an LLM backend instance")
+        import os
+        import sys
+        import time as _time
+
         out: dict[str, dict] = {}
         summaries: dict[str, dict] = {}
+        prev: dict[str, Any] = {}
+        if checkpoint and os.path.exists(checkpoint):
+            with open(checkpoint, "r", encoding="utf-8") as fh:
+                prev = json.load(fh)
+            done = [k for k in prev if not str(k).startswith("__")]
+            if done:
+                print(f"  resuming: {len(done)} function(s) already answered", file=sys.stderr)
+
+        def complete_fn(fn_key: str) -> bool:
+            """True when a previous checkpoint already has every answer for fn_key."""
+            prev_fn = prev.get(fn_key)
+            if not isinstance(prev_fn, dict):
+                return False
+            return all(
+                isinstance(by_persona, dict) and all(str(v) for v in by_persona.values())
+                for by_persona in prev_fn.values()
+            )
+
+        t0 = _time.time()
+        failures = 0
         for fn in fns:
             entry = probes_by_key.get(fn.key, {})
             runnable = [p for p in entry.get("probes", []) if p.get("ok")]
             if not runnable:
+                continue
+            if complete_fn(fn.key):
+                out[fn.key] = prev[fn.key]
+                summaries[fn.key] = (prev.get("__summaries__") or {}).get(fn.key, {})
                 continue
             system, _ = witness_prompt(fn, runnable)
             cols: list[dict[str, str]] = [dict() for _ in runnable]
@@ -97,12 +131,34 @@ def run_witnesses(
                     parsed = parse_witness_reply(
                         llm.complete(system, user), len(runnable)
                     )
+                    failures = 0
                 except Exception as exc:
                     parsed = {"summary": f"error: {exc}", "predictions": [""] * len(runnable)}
+                    failures += 1
+                    if failures >= 6:
+                        out["__summaries__"] = summaries
+                        if checkpoint:
+                            with open(checkpoint, "w", encoding="utf-8") as fh:
+                                json.dump(out, fh, indent=1, sort_keys=True)
+                        raise ValueError(
+                            f"aborting after {failures} consecutive witness failures "
+                            f"({exc}). Partial answers saved to {checkpoint}; "
+                            "rerun the same command later to resume."
+                        )
                 summaries[fn.key][persona] = parsed["summary"]
                 for i, pred in enumerate(parsed["predictions"]):
                     cols[i][persona] = pred
             out[fn.key] = {str(i): cols[i] for i in range(len(cols))}
+            if checkpoint:
+                out["__summaries__"] = summaries
+                with open(checkpoint, "w", encoding="utf-8") as fh:
+                    json.dump(out, fh, indent=1, sort_keys=True)
+            print(
+                f"  [{len(out)}] {fn.key}: {len(personas)} readers on {len(runnable)} probe(s)"
+                f" ({_time.time() - t0:.0f}s)",
+                file=sys.stderr,
+                flush=True,
+            )
         out["__summaries__"] = summaries
         return out
 
