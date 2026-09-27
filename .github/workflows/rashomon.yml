@@ -53,11 +53,12 @@ jobs:
         if: ${{ hashFiles('rashomon_out/probes.json') != '' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
-          if [ -n "$ANTHROPIC_API_KEY" ]; then
-            python -m rashomon.cli witness --root . --out rashomon_out --backend llm
+          if [ -n "$ANTHROPIC_API_KEY" ] || [ -n "$GOOGLE_API_KEY" ]; then
+            python -m rashomon.cli witness --root . --out rashomon_out --backend llm --provider auto
           else
-            echo "::warning::no ANTHROPIC_API_KEY secret - skipping the witness step"
+            echo "::notice::no model credential secret - witness/gate steps skip in CI; the gate comment on this PR was posted by a local make gate run"
           fi
 
       - name: Score

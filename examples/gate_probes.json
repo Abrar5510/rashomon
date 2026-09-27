@@ -1,0 +1,124 @@
+{
+  "examples/timelib.py::parse_duration": [
+    {
+      "args": [],
+      "kwargs": {
+        "text": "1h30m"
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "5400",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "text": "90"
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "90",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "text": "2h"
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "7200",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "text": "45s"
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "45",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "text": "1h30m30s"
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "5430",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "text": "0"
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "0",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "text": "  10m  "
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "600",
+      "error": null
+    }
+  ],
+  "examples/timelib.py::clamp": [
+    {
+      "args": [],
+      "kwargs": {
+        "value": 5.0,
+        "low": 0.0,
+        "high": 10.0
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "5.0",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "value": -3.0,
+        "low": 0.0,
+        "high": 10.0
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "0.0",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "value": 15.0,
+        "low": 0.0,
+        "high": 10.0
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "10.0",
+      "error": null
+    },
+    {
+      "args": [],
+      "kwargs": {
+        "value": 0.0,
+        "low": 0.0,
+        "high": 0.0
+      },
+      "label": "typical",
+      "ok": true,
+      "repr": "0.0",
+      "error": null
+    }
+  ]
+}
