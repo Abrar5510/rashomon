@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>RASHOMON — unit tests for readability</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: #0e1014;
+        font-family: ui-sans-serif, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      :root {
+        --bg: #0e1014;
+        --surface: #161a21;
+        --surface-2: #1c212b;
+        --line: #2b323f;
+        --fg: #e8eaf0;
+        --muted: #99a2b4;
+        --accent: #ffb454;
+        --bad: #f06f5f;
+        --good: #79d7a7;
+        --mono: ui-monospace, monospace;
+      }
+      #root {
+        position: relative;
+        width: 1920px; height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--fg);
+      }
+
+      /* ---------- backdrop (track 0) ---------- */
+      #backdrop { position: absolute; inset: 0; overflow: hidden; }
+      #grid {
+        position: absolute; inset: -300px 0 -300px 0;
+        background-image:
+          repeating-linear-gradient(to right, rgba(255,180,84,.055) 0 1px, transparent 1px 96px),
+          repeating-linear-gradient(to bottom, rgba(232,234,240,.04) 0 1px, transparent 1px 96px);
+        will-change: transform;
+      }
+      #glow {
+        position: absolute; left: 50%; top: 46%;
+        width: 1500px; height: 1000px; margin: -500px 0 0 -750px;
+        background: radial-gradient(ellipse at center, rgba(255,180,84,.30) 0%, rgba(255,180,84,.09) 42%, rgba(255,180,84,0) 72%);
+      }
+      #rings {
+        position: absolute; right: -260px; top: 120px;
+        width: 940px; height: 940px;
+        border: 2px solid rgba(255,180,84,.17); border-radius: 50%;
+        will-change: transform;
+      }
+      #rings::after {
+        content: ""; position: absolute; inset: 132px;
+        border: 2px solid rgba(232,234,240,.11); border-radius: 50%;
+      }
+      #rings2 {
+        position: absolute; left: -300px; bottom: -340px;
+        width: 760px; height: 760px;
+        border: 2px solid rgba(232,234,240,.08); border-radius: 50%;
+        will-change: transform;
+      }
+      #hair {
+        position: absolute; left: 96px; right: 96px; top: 176px; height: 2px;
+        background: linear-gradient(90deg, rgba(255,180,84,.85), rgba(255,180,84,0));
+        transform-origin: left center;
+      }
+      #grain {
+        position: absolute; inset: 0; opacity: .5; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.5'/></svg>");
+      }
+
+      /* ---------- live footage (track 1) ---------- */
+      #vid-a, #vid-b {
+        position: absolute; left: 0; top: 0;
+        width: 1920px; height: 1080px;
+        object-fit: cover;
+        filter: brightness(1.14) contrast(1.04) saturate(1.02);
+      }
+
+      /* ---------- scenes (track 2) ---------- */
+      .scene { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+      .scrim-l {
+        position: absolute; inset: 0;
+        background: linear-gradient(90deg, rgba(14,16,20,.90) 0%, rgba(14,16,20,.84) 34%, rgba(14,16,20,.34) 58%, rgba(14,16,20,0) 74%);
+      }
+      .scrim-full {
+        position: absolute; inset: 0;
+        background: linear-gradient(90deg, rgba(14,16,20,.93) 0%, rgba(14,16,20,.90) 50%, rgba(14,16,20,.72) 78%, rgba(14,16,20,.62) 100%);
+      }
+      .panel {
+        position: absolute; left: 96px; width: 800px;
+        background: rgba(22,26,33,.97);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 30px 34px;
+        will-change: transform;
+      }
+      .panel-h {
+        font-family: var(--mono); font-size: 21px; color: var(--muted);
+        letter-spacing: .04em; margin-bottom: 20px;
+      }
+      .panel-h b { color: var(--accent); font-weight: 600; }
+
+      /* ---------- F1 cold open ---------- */
+      .co { position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 44px; }
+      .kicker {
+        font-family: var(--mono); font-size: 24px; letter-spacing: .42em;
+        color: var(--accent); text-transform: uppercase;
+      }
+      .co-code {
+        font-family: var(--mono); font-size: 74px; font-weight: 500;
+        background: rgba(22,26,33,.92); border: 1px solid var(--line);
+        border-radius: 14px; padding: 26px 46px; will-change: transform;
+      }
+      .co-code .fn { color: var(--accent); }
+      .co-code .str { color: var(--good); }
+      .co-code .arrow { color: var(--muted); }
+      .co-cards { display: flex; gap: 22px; }
+      .co-card {
+        width: 300px; padding: 24px 20px 22px; text-align: center;
+        background: rgba(22,26,33,.97); border: 1px solid var(--line);
+        border-radius: 14px; position: relative; will-change: transform;
+      }
+      .wn { font-family: var(--mono); font-size: 20px; color: var(--muted); letter-spacing: .03em; }
+      .wp { font-family: var(--mono); font-size: 46px; font-weight: 700; margin-top: 14px; }
+      .co-card .tick {
+        position: absolute; top: -17px; right: -13px;
+        font-size: 34px; font-weight: 800; line-height: 1;
+        padding: 7px 12px; border-radius: 9px; will-change: transform;
+      }
+      .tick.ok { background: var(--good); color: #07130d; }
+      .tick.no { background: var(--bad); color: #1a0805; }
+      .co-res {
+        display: flex; align-items: baseline; gap: 26px;
+        background: rgba(22,26,33,.97); border: 1px solid var(--accent);
+        border-radius: 14px; padding: 22px 40px; will-change: transform;
+      }
+      .co-res .rl { font-family: var(--mono); font-size: 24px; color: var(--muted); }
+      .co-res .rv { font-family: var(--mono); font-size: 76px; font-weight: 800; color: var(--accent); }
+      .co-res .rm { font-family: var(--mono); font-size: 24px; color: var(--fg); }
+
+      /* ---------- F2 stat rows ---------- */
+      .stats { position: absolute; inset: 0; display: flex; flex-direction: column;
+               justify-content: center; gap: 54px; padding: 0 150px; }
+      .stat-row {
+        display: grid; grid-template-columns: 400px 1fr; gap: 44px; align-items: center;
+        background: rgba(22,26,33,.95); border: 1px solid var(--line);
+        border-radius: 14px; padding: 34px 44px; will-change: transform;
+      }
+      .stat-num {
+        font-family: var(--mono); font-size: 118px; font-weight: 800; color: var(--accent);
+        line-height: 1; font-variant-numeric: tabular-nums; text-align: right;
+        transform-origin: right center; will-change: transform;
+      }
+      .stat-num .suf { font-size: 66px; }
+      .stat-txt { font-size: 44px; font-weight: 700; line-height: 1.24; letter-spacing: -.01em; }
+      .stat-txt b { color: var(--accent); font-weight: 800; }
+      .stat-src { font-family: var(--mono); font-size: 21px; color: var(--muted); margin-top: 14px; }
+      .rho { display: inline-block; will-change: transform; }
+
+      /* ---------- F3 modes ---------- */
+      #s3p { top: 150px; }
+      .mode {
+        display: flex; align-items: center; justify-content: space-between;
+        font-family: var(--mono); font-size: 30px; padding: 20px 24px;
+        background: var(--surface-2); border: 1px solid var(--line);
+        border-radius: 10px; margin-bottom: 14px; will-change: transform;
+      }
+      .mode.on { background: rgba(255,180,84,.14); border-color: var(--accent); color: var(--accent); }
+      .mode .on-tag {
+        font-size: 19px; letter-spacing: .18em; text-transform: uppercase;
+        background: var(--accent); color: #1a1206; padding: 5px 12px; border-radius: 6px;
+        will-change: transform;
+      }
+      .chip {
+        position: absolute; left: 96px; bottom: 84px;
+        font-family: var(--mono); font-size: 26px; color: var(--bg);
+        background: var(--accent); padding: 14px 26px; border-radius: 9px; font-weight: 700;
+        will-change: transform;
+      }
+
+      /* ---------- F4 witnesses ---------- */
+      .fork {
+        position: absolute; left: 96px; top: 120px;
+        font-family: var(--mono); font-size: 30px; color: var(--accent);
+        background: rgba(14,16,20,.9); border: 1px solid var(--accent);
+        padding: 16px 28px; border-radius: 10px; will-change: transform;
+      }
+      .wrow { position: absolute; left: 96px; right: 96px; bottom: 92px; display: flex; gap: 20px; }
+      .w2 {
+        flex: 1; background: rgba(22,26,33,.97); border: 1px solid var(--line);
+        border-radius: 12px; padding: 22px 18px; text-align: center; will-change: transform;
+      }
+      .w2 .wn { font-size: 19px; }
+      .w2 .wp { font-size: 38px; margin-top: 12px; }
+      #s4v {
+        position: absolute; right: 96px; top: 120px;
+        font-family: var(--mono); font-size: 26px; color: var(--fg);
+        background: rgba(14,16,20,.9); border: 1px solid var(--line);
+        padding: 16px 26px; border-radius: 10px; will-change: transform;
+      }
+
+      /* ---------- F5 score ---------- */
+      #s5p { top: 190px; }
+      .big { display: flex; align-items: baseline; gap: 8px; line-height: 1.18; }
+      .big .n {
+        font-family: var(--mono); font-size: 176px; font-weight: 800; color: var(--bad);
+        line-height: 1.18; font-variant-numeric: tabular-nums;
+        transform-origin: left center; display: inline-block; will-change: transform;
+      }
+      .big .pc { font-family: var(--mono); font-size: 76px; font-weight: 700; color: var(--bad); }
+      .big-label {
+        font-size: 34px; font-weight: 800; letter-spacing: .3em; color: var(--muted);
+        text-transform: uppercase; margin-top: 14px;
+      }
+      .bar { height: 26px; background: var(--surface-2); border: 1px solid var(--line);
+             border-radius: 13px; overflow: hidden; margin: 30px 0 22px; }
+      .bar span { display: block; height: 100%; background: var(--bad);
+                  transform-origin: left center; will-change: transform; }
+      .rowline { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+      .rowline .v { font-family: var(--mono); font-size: 32px; font-weight: 700; }
+      .badge {
+        font-family: var(--mono); font-size: 22px; padding: 11px 18px; border-radius: 8px;
+        will-change: transform;
+      }
+      .badge.bad { background: rgba(240,111,95,.16); color: var(--bad); border: 1px solid var(--bad); }
+      .badge.good { background: rgba(121,215,167,.14); color: var(--good); border: 1px solid var(--good); }
+
+      /* ---------- F6 history ---------- */
+      #s6p { top: 168px; }
+      .commit {
+        display: flex; gap: 18px; align-items: flex-start;
+        background: var(--surface-2); border: 1px solid var(--line);
+        border-radius: 10px; padding: 18px 20px; margin-bottom: 14px;
+        will-change: transform;
+      }
+      .commit .sha { font-family: var(--mono); font-size: 23px; color: var(--accent); flex: none; }
+      .commit .subj { font-family: var(--mono); font-size: 23px; color: var(--fg); line-height: 1.35; }
+      .hist-foot {
+        font-family: var(--mono); font-size: 24px; color: var(--muted); line-height: 1.6;
+        border-top: 1px solid var(--line); padding-top: 20px; will-change: transform;
+      }
+      .hist-foot b { color: var(--accent); font-weight: 700; }
+
+      /* ---------- F7 / F8 stacked cards ---------- */
+      #s7a { top: 128px; }
+      #s7b { top: 470px; }
+      #s8a { top: 148px; }
+      #s8b { top: 552px; }
+      .kv { display: flex; justify-content: space-between; font-family: var(--mono);
+            font-size: 28px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+      .kv:last-child { border-bottom: 0; }
+      .kv .k { color: var(--muted); }
+      .kv .v { color: var(--fg); font-weight: 700; }
+      .kv .v.acc { color: var(--accent); }
+      .kv .v.good { color: var(--good); }
+      .equiv {
+        font-family: var(--mono); font-size: 96px; font-weight: 800; color: var(--good);
+        font-variant-numeric: tabular-nums; transform-origin: left center;
+        display: inline-block; will-change: transform;
+      }
+      .equiv-sub { font-family: var(--mono); font-size: 27px; color: var(--muted); margin-top: 12px; }
+      .arrow-move { color: var(--accent); font-family: var(--mono); font-size: 32px; }
+      .mono-note { font-family: var(--mono); font-size: 23px; color: var(--muted); line-height: 1.55; margin-top: 16px; }
+
+      /* ---------- F9 leaderboard ---------- */
+      #s9in { position: absolute; inset: 0; padding: 96px 96px 76px; }
+      .lb-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 30px; }
+      .lb-title { font-size: 56px; font-weight: 900; letter-spacing: -.02em; }
+      .lb-title span { color: var(--accent); }
+      .lb-sub { font-family: var(--mono); font-size: 23px; color: var(--muted); }
+      .lb-row {
+        display: grid; grid-template-columns: 62px 560px 1fr 210px 150px;
+        gap: 26px; align-items: center;
+        background: rgba(22,26,33,.97); border: 1px solid var(--line);
+        border-radius: 11px; padding: 17px 26px; margin-bottom: 13px;
+        will-change: transform;
+      }
+      .lb-rank { font-family: var(--mono); font-size: 30px; font-weight: 800; color: var(--muted); }
+      .lb-name { font-family: var(--mono); font-size: 25px; color: var(--fg); }
+      .lb-bar { height: 20px; background: var(--surface-2); border-radius: 10px; overflow: hidden; }
+      .lb-bar span { display: block; height: 100%; transform-origin: left center;
+                     background: var(--bad); will-change: transform; }
+      .lb-bar span.low { background: var(--good); }
+      .lb-bar span.mid { background: var(--accent); }
+      .lb-pct { font-family: var(--mono); font-size: 28px; font-weight: 800; text-align: right;
+                color: var(--fg); font-variant-numeric: tabular-nums; }
+      .lb-fix { font-family: var(--mono); font-size: 22px; color: var(--muted); text-align: right; }
+      #s9rho {
+        margin-top: 24px; display: block;
+        font-family: var(--mono); font-size: 34px; font-weight: 700; line-height: 1.4;
+        background: rgba(255,180,84,.12); border: 1px solid var(--accent);
+        color: var(--accent); border-radius: 12px; padding: 20px 32px;
+        white-space: nowrap; will-change: transform;
+      }
+      #s9rho em { display: block; font-style: normal; color: var(--fg); font-weight: 500;
+                  font-size: 25px; margin-top: 6px; }
+      #s9foot { margin-top: 24px; font-family: var(--mono); font-size: 24px; color: var(--muted);
+                will-change: transform; }
+
+      /* ---------- F10 title ---------- */
+      .close { position: absolute; inset: 0; display: flex; flex-direction: column;
+               align-items: center; justify-content: center; gap: 34px; }
+      .close-title {
+        font-size: 178px; font-weight: 900; letter-spacing: -.045em; line-height: 1;
+        will-change: transform;
+      }
+      .close-title span { display: inline-block; will-change: transform; }
+      .close-tag { display: flex; gap: 26px; font-family: var(--mono); font-size: 46px;
+                   color: var(--muted); letter-spacing: .16em; text-transform: uppercase; }
+      .close-tag span { display: inline-block; will-change: transform; }
+      .close-foot { font-family: var(--mono); font-size: 26px; color: var(--muted);
+                    border-top: 1px solid var(--line); padding-top: 26px;
+                    text-align: center; line-height: 1.7; will-change: transform; }
+      .close-foot b { color: var(--accent); font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="180"
+      data-fps="30"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- ============ track 0 · backdrop ============ -->
+      <div id="backdrop" class="clip" data-layout-allow-overflow data-start="0" data-duration="180" data-track-index="0">
+        <div id="grid"></div>
+        <div id="glow"></div>
+        <div id="rings"></div>
+        <div id="rings2"></div>
+        <div id="hair"></div>
+        <div id="grain"></div>
+      </div>
+
+      <!-- ============ track 1 · live Bob footage ============ -->
+      <video
+        id="vid-a" src="assets/take1.mov" muted
+        data-start="30" data-duration="35" data-media-start="5" data-track-index="1"
+      ></video>
+      <video
+        id="vid-b" src="assets/take3.mov" muted
+        data-start="65" data-duration="100" data-media-start="0" data-track-index="1"
+      ></video>
+
+      <!-- ============ track 2 · scenes ============ -->
+
+      <!-- F1 · 00:00–00:12 cold open -->
+      <section id="s1" class="clip scene" data-start="0" data-duration="12" data-track-index="2">
+        <div class="co">
+          <div class="kicker" id="s1-k">Rashomon · witness packet 01</div>
+          <div class="co-code" id="s1-code">
+            <span class="fn">parse_duration</span>(<span class="str">'1h30m'</span>)
+            <span class="arrow">→ ?</span>
+          </div>
+          <div class="co-cards">
+            <div class="co-card">
+              <div class="wn">api-historian</div><div class="wp">'1h30m'</div>
+              <span class="tick no">✕</span>
+            </div>
+            <div class="co-card">
+              <div class="wn">careful-stylist</div><div class="wp">5400</div>
+              <span class="tick ok">✓</span>
+            </div>
+            <div class="co-card">
+              <div class="wn">edge-case-hunter</div><div class="wp">5400</div>
+              <span class="tick ok">✓</span>
+            </div>
+            <div class="co-card">
+              <div class="wn">regex-allergic</div><div class="wp">3600</div>
+              <span class="tick no">✕</span>
+            </div>
+            <div class="co-card">
+              <div class="wn">speed-reader</div><div class="wp">90</div>
+              <span class="tick no">✕</span>
+            </div>
+          </div>
+          <div class="co-res" id="s1-res">
+            <span class="rl">we ran it</span>
+            <span class="rv">5400</span>
+            <span class="rm">2 of 5 readers were right</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- F2 · 00:12–00:30 three title cards -->
+      <section id="s2" class="clip scene" data-start="12" data-duration="18" data-track-index="2">
+        <div class="stats">
+          <div class="stat-row" id="s2a">
+            <div class="stat-num"><span id="c1">0</span><span class="suf">%</span></div>
+            <div>
+              <div class="stat-txt">of development time is spent <b>reading code</b></div>
+              <div class="stat-src">Xia et al., IEEE TSE 2018 — 78 professionals, 3,148 hours</div>
+            </div>
+          </div>
+          <div class="stat-row" id="s2b">
+            <div class="stat-num"><span id="c2">0</span></div>
+            <div>
+              <div class="stat-txt">readability metrics proposed — <b>they measure the file, not the reader</b></div>
+              <div class="stat-src">Scalabrino et al. — they fail to track human judgement</div>
+            </div>
+          </div>
+          <div class="stat-row" id="s2c">
+            <div class="stat-num"><span class="rho">ρ ≈ 0</span></div>
+            <div>
+              <div class="stat-txt">ask a model <b>“is this readable?”</b> — it correlates with people at basically zero</div>
+              <div class="stat-src">CoReEval — model ratings vs. human ratings</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- F3 · 00:30–00:45 mode rashomon -->
+      <section id="s3" class="clip scene" data-start="30" data-duration="15" data-track-index="2">
+        <div class="scrim-l"></div>
+        <div class="panel" id="s3p">
+          <div class="panel-h">IBM Bob · custom modes</div>
+          <div class="mode on">🎭 &nbsp;rashomon<span class="on-tag">active</span></div>
+          <div class="mode">🧪 &nbsp;probesmith</div>
+          <div class="mode">🔍 &nbsp;clarifier</div>
+        </div>
+        <div class="chip" id="s3chip">mode: rashomon</div>
+      </section>
+
+      <!-- F4 · 00:45–01:05 five isolated readers -->
+      <section id="s4" class="clip scene" data-start="45" data-duration="20" data-track-index="2">
+        <div class="scrim-l"></div>
+        <div class="fork" id="s4fork">fork_context: false &nbsp;·&nbsp; one tool call each</div>
+        <div id="s4v">5 readers × 3 probes = 15 readings</div>
+        <div class="wrow">
+          <div class="w2"><div class="wn">api-historian</div><div class="wp">'1h30m'</div></div>
+          <div class="w2"><div class="wn">careful-stylist</div><div class="wp">5400</div></div>
+          <div class="w2"><div class="wn">edge-case-hunter</div><div class="wp">5400</div></div>
+          <div class="w2"><div class="wn">regex-allergic</div><div class="wp">3600</div></div>
+          <div class="w2"><div class="wn">speed-reader</div><div class="wp">90</div></div>
+        </div>
+      </section>
+
+      <!-- F5 · 01:05–01:20 make score -->
+      <section id="s5" class="clip scene" data-start="65" data-duration="15" data-track-index="2">
+        <div class="scrim-l"></div>
+        <div class="panel" id="s5p">
+          <div class="panel-h">chronex/parsing.py::parse_duration &nbsp;·&nbsp; <b>make score</b></div>
+          <div class="big"><span class="n" id="c5">0</span><span class="pc">%</span></div>
+          <div class="big-label">misread</div>
+          <div class="bar"><span id="s5bar"></span></div>
+          <div class="rowline">
+            <span class="v">7 / 15 readings</span>
+            <span class="badge bad" id="s5badge">Consensus misread</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- F6 · 01:20–01:35 make history -->
+      <section id="s6" class="clip scene" data-start="80" data-duration="15" data-track-index="2">
+        <div class="scrim-l"></div>
+        <div class="panel" id="s6p">
+          <div class="panel-h">git log &nbsp;·&nbsp; demo/target_repo</div>
+          <div class="commit"><span class="sha">e12e3c6</span><span class="subj">fix: parse_duration ignored the 'd' suffix</span></div>
+          <div class="commit"><span class="sha">dddce92</span><span class="subj">fix: slugify produced repeated dashes</span></div>
+          <div class="commit"><span class="sha">4101cc2</span><span class="subj">fix: is_palindrome choked on punctuation</span></div>
+          <div class="hist-foot">
+            <b>9 / 9</b> functions in this repo carry a boundary-bug fix<br />
+            parse_duration · 1 bug fix · 2 touching commits
+          </div>
+        </div>
+      </section>
+
+      <!-- F7 · 01:35–02:00 clarifier + make equiv -->
+      <section id="s7" class="clip scene" data-start="95" data-duration="25" data-track-index="2">
+        <div class="scrim-l"></div>
+        <div class="panel" id="s7a">
+          <div class="panel-h">mode <b>clarifier</b> &nbsp;·&nbsp; chronex/text.py::slugify</div>
+          <div class="kv"><span class="k">writes to</span><span class="v">rashomon_out/clarified/</span></div>
+          <div class="kv"><span class="k">real source file</span><span class="v good">untouched</span></div>
+          <div class="mono-note">Rewrite into a copy — we only judge the new wording after the behaviour is proven identical.</div>
+        </div>
+        <div class="panel" id="s7b">
+          <div class="panel-h"><b>make equiv</b></div>
+          <div><span class="equiv" id="c7">0</span><span class="equiv" style="color:var(--muted)"> / 15</span></div>
+          <div class="equiv-sub">identical outputs on every probe · equivalence gate passed</div>
+        </div>
+      </section>
+
+      <!-- F8 · 02:00–02:15 rewatch + PR comment -->
+      <section id="s8" class="clip scene" data-start="120" data-duration="15" data-track-index="2">
+        <div class="scrim-l"></div>
+        <div class="panel" id="s8a">
+          <div class="panel-h"><b>make rewatch</b> &nbsp;·&nbsp; chronex/text.py::slugify</div>
+          <div class="kv"><span class="k">misread rate</span><span class="v"><span style="color:var(--bad)">13%</span> <span class="arrow-move">→</span> <span style="color:var(--good)">0%</span></span></div>
+          <div class="kv"><span class="k">misreads</span><span class="v">2/15 <span class="arrow-move">→</span> 0/15</span></div>
+          <div class="kv"><span class="k">clean witnesses</span><span class="v good">3/5 <span class="arrow-move">→</span> 5/5</span></div>
+          <div class="kv"><span class="k">label</span><span class="v">Scattered <span class="arrow-move">→</span> Clear</span></div>
+        </div>
+        <div class="panel" id="s8b">
+          <div class="panel-h">make gate &nbsp;·&nbsp; comment posted on the pull request</div>
+          <div class="kv"><span class="k">function</span><span class="v">slugify (chronex/text.py)</span></div>
+          <div class="kv"><span class="k">misreads (95% CI)</span><span class="v good">0/15 (0%–20%)</span></div>
+          <div class="kv"><span class="k">clean witnesses</span><span class="v">5/5</span></div>
+          <div class="mono-note">“No readability regressions against the baseline.”</div>
+        </div>
+      </section>
+
+      <!-- F9 · 02:15–02:45 leaderboard + correlation -->
+      <section id="s9" class="clip scene" data-start="135" data-duration="30" data-track-index="2">
+        <div class="scrim-full" id="s9scrim" style="opacity:0"></div>
+        <div id="s9in">
+          <div class="lb-head" id="s9head">
+            <div class="lb-title">Leaderboard <span>· 6 of 30</span></div>
+            <div class="lb-sub">session: live &nbsp;·&nbsp; 410 predictions &nbsp;·&nbsp; gemini-3.5-flash-lite ×5</div>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">1</span>
+            <span class="lb-name">OrderedMultiDict.itervalues</span>
+            <span class="lb-bar"><span style="width:100%"></span></span>
+            <span class="lb-pct">100%</span>
+            <span class="lb-fix">3 fixes</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">2</span>
+            <span class="lb-name">OrderedMultiDict.iteritems</span>
+            <span class="lb-bar"><span style="width:100%"></span></span>
+            <span class="lb-pct">100%</span>
+            <span class="lb-fix">2 fixes</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">3</span>
+            <span class="lb-name">get_profile_json</span>
+            <span class="lb-bar"><span style="width:100%"></span></span>
+            <span class="lb-pct">100%</span>
+            <span class="lb-fix">2 fixes</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">8</span>
+            <span class="lb-name">windowed_iter</span>
+            <span class="lb-bar"><span class="mid" style="width:80%"></span></span>
+            <span class="lb-pct">80%</span>
+            <span class="lb-fix">0 fixes</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">13</span>
+            <span class="lb-name">BarrelList.insert</span>
+            <span class="lb-bar"><span class="mid" style="width:20%"></span></span>
+            <span class="lb-pct">20%</span>
+            <span class="lb-fix">1 fix</span>
+          </div>
+          <div class="lb-row">
+            <span class="lb-rank">18</span>
+            <span class="lb-name">OrderedMultiDict.poplast</span>
+            <span class="lb-bar"><span class="low" style="width:4%"></span></span>
+            <span class="lb-pct">0%</span>
+            <span class="lb-fix">2 fixes</span>
+          </div>
+          <div id="s9rho">
+            Spearman ρ = 0.394 &nbsp;·&nbsp; p = 0.031
+            <em>functions that mislead readers also carry more bug-fix commits</em>
+          </div>
+          <div id="s9foot">30 functions · 410 predictions · 9 Consensus misread / 4 Scattered / 17 Clear · 95% CI [0.03, 0.71]</div>
+        </div>
+      </section>
+
+      <!-- F10 · 02:45–03:00 title card -->
+      <section id="s10" class="clip scene" data-start="165" data-duration="15" data-track-index="2">
+        <div class="close">
+          <div class="close-title" id="s10-title">RASHOMON</div>
+          <div class="close-tag">
+            <span id="s10-w1">unit</span><span id="s10-w2">tests</span><span id="s10-w3">for</span><span id="s10-w4">readability</span>
+          </div>
+          <div class="close-foot" id="s10-foot">
+            CRUXEval grades models with code &nbsp;·&nbsp; <b>Rashomon grades code with models</b><br />
+            ρ = 0.394 (p = 0.031) &nbsp;·&nbsp; 30 functions &nbsp;·&nbsp; 410 predictions
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ track 10–19 · narration ============ -->
+      <audio id="a1"  src="assets/narr/n1.wav"  data-start="0.8"   data-track-index="10"></audio>
+      <audio id="a2"  src="assets/narr/n2.wav"  data-start="12.6"  data-track-index="11"></audio>
+      <audio id="a3"  src="assets/narr/n3.wav"  data-start="30.6"  data-track-index="12"></audio>
+      <audio id="a4"  src="assets/narr/n4.wav"  data-start="45.4"  data-track-index="13"></audio>
+      <audio id="a5"  src="assets/narr/n5.wav"  data-start="65.6"  data-track-index="14"></audio>
+      <audio id="a6"  src="assets/narr/n6.wav"  data-start="80.6"  data-track-index="15"></audio>
+      <audio id="a7"  src="assets/narr/n7a.wav" data-start="95.6"  data-track-index="16"></audio>
+      <audio id="a8"  src="assets/narr/n7b.wav" data-start="120.6" data-track-index="17"></audio>
+      <audio id="a9"  src="assets/narr/n8.wav"  data-start="135.6" data-track-index="18"></audio>
+      <audio id="a10" src="assets/narr/n9.wav"  data-start="166.0" data-track-index="19"></audio>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+
+      /* ---------- track 0 · backdrop ambient (finite, seek-safe) ---------- */
+      tl.fromTo("#rings", { x: -50, rotation: 0 }, { x: 50, rotation: 14, duration: 180, ease: "none" }, 0);
+      tl.fromTo("#rings2", { x: 46, y: 0 }, { x: -46, y: -34, duration: 180, ease: "none" }, 0);
+      tl.fromTo("#grid", { y: 0 }, { y: -288, duration: 180, ease: "none" }, 0);
+      tl.fromTo("#glow", { opacity: 0.26 },
+        { opacity: 0.4, duration: 4, ease: "sine.inOut", yoyo: true, repeat: 44 }, 0);
+      tl.fromTo("#hair", { scaleX: 0 }, { scaleX: 1, duration: 2.4, ease: "power4.out" }, 0.3);
+
+      /* ---------- F1 · 0–12 cold open ---------- */
+      tl.fromTo("#s1-k", { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.35, ease: "power4.out" }, 0.25);
+      tl.fromTo("#s1-code", { opacity: 0, y: 46 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, 0.55);
+      tl.fromTo(".co-card", { opacity: 0, y: 64, scale: 0.93 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.09 }, 2.1);
+      tl.fromTo("#s1-res", { opacity: 0, y: 42 },
+        { opacity: 1, y: 0, duration: 0.5 }, 6.7);
+      tl.fromTo("#s1 .tick", { opacity: 0, scale: 0.35 },
+        { opacity: 1, scale: 1, duration: 0.34, stagger: 0.06 }, 7.35);
+
+      /* ---------- F2 · 12–30 three stat cards ---------- */
+      const c1 = { v: 0 }, c2 = { v: 0 };
+      const e1 = document.getElementById("c1"), e2 = document.getElementById("c2");
+      tl.fromTo("#s2a", { opacity: 0, y: 72 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 12.4);
+      tl.fromTo(c1, { v: 0 }, { v: 58, duration: 1.6, ease: "power3.out",
+        onUpdate: () => { e1.textContent = Math.round(c1.v); } }, 12.7);
+      tl.fromTo("#s2a .stat-num", { scale: 0.5 }, { scale: 1, duration: 1.6 }, 12.7);
+
+      tl.fromTo("#s2b", { opacity: 0, y: 72 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 17.6);
+      tl.fromTo(c2, { v: 0 }, { v: 121, duration: 1.6, ease: "power3.out",
+        onUpdate: () => { e2.textContent = Math.round(c2.v); } }, 17.9);
+      tl.fromTo("#s2b .stat-num", { scale: 0.5 }, { scale: 1, duration: 1.6 }, 17.9);
+
+      tl.fromTo("#s2c", { opacity: 0, y: 72 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 23.2);
+      tl.fromTo("#s2c .rho", { opacity: 0, scale: 0.6 },
+        { opacity: 1, scale: 1, duration: 0.6 }, 23.6);
+
+      /* ---------- F3 · 30–45 mode rashomon ---------- */
+      tl.fromTo("#s3p", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 30.4);
+      tl.fromTo("#s3p .mode", { opacity: 0, y: 34 },
+        { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: "power4.out" }, 30.95);
+      tl.fromTo("#s3chip", { opacity: 0, y: 28 },
+        { opacity: 1, y: 0, duration: 0.4 }, 32.3);
+      tl.fromTo("#s3p .on-tag", { opacity: 0, scale: 0.7 },
+        { opacity: 1, scale: 1, duration: 0.45 }, 33.1);
+
+      /* ---------- F4 · 45–65 five isolated readers ---------- */
+      tl.fromTo("#s4fork", { opacity: 0, y: -24 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power4.out" }, 45.2);
+      tl.fromTo(".w2", { opacity: 0, y: 74, scale: 0.92 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.09 }, 45.6);
+      tl.fromTo("#s4v", { opacity: 0, y: -24 },
+        { opacity: 1, y: 0, duration: 0.4 }, 56.6);
+
+      /* ---------- F5 · 65–80 make score ---------- */
+      const c5 = { v: 0 };
+      const e5 = document.getElementById("c5");
+      tl.fromTo("#s5p", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 65.4);
+      tl.fromTo(c5, { v: 0 }, { v: 47, duration: 1.7, ease: "power3.out",
+        onUpdate: () => { e5.textContent = Math.round(c5.v); } }, 65.9);
+      tl.fromTo("#c5", { scale: 0.55 }, { scale: 1, duration: 1.7 }, 65.9);
+      tl.fromTo("#s5bar", { scaleX: 0 }, { scaleX: 0.47, duration: 1.7 }, 65.9);
+      tl.fromTo("#s5badge", { opacity: 0, scale: 0.7 },
+        { opacity: 1, scale: 1, duration: 0.45 }, 68.1);
+
+      /* ---------- F6 · 80–95 make history ---------- */
+      tl.fromTo("#s6p", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 80.4);
+      tl.fromTo("#s6p .commit", { opacity: 0, y: 54 },
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.13, ease: "power4.out" }, 80.95);
+      tl.fromTo("#s6p .hist-foot", { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.5 }, 84.6);
+
+      /* ---------- F7 · 95–120 clarifier + equiv ---------- */
+      const c7 = { v: 0 };
+      const e7 = document.getElementById("c7");
+      tl.fromTo("#s7a", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 95.3);
+      tl.fromTo("#s7b", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 104.2);
+      tl.fromTo(c7, { v: 0 }, { v: 15, duration: 1.3, ease: "power3.out",
+        onUpdate: () => { e7.textContent = Math.round(c7.v); } }, 104.7);
+      tl.fromTo("#c7", { scale: 0.6 }, { scale: 1, duration: 1.3 }, 104.7);
+
+      /* ---------- F8 · 120–135 rewatch + PR comment ---------- */
+      tl.fromTo("#s8a", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 120.4);
+      tl.fromTo("#s8b", { opacity: 0, x: -44, scale: 0.94 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 123.4);
+
+      /* ---------- F9 · 135–165 leaderboard ---------- */
+      tl.fromTo("#s9scrim", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 135.2);
+      tl.fromTo("#s9head", { opacity: 0, y: 46 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 135.5);
+      tl.fromTo("#s9 .lb-row", { opacity: 0, y: 56 },
+        { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: "power4.out" }, 136.3);
+      tl.fromTo("#s9 .lb-bar span", { scaleX: 0 },
+        { scaleX: 1, duration: 0.9, stagger: 0.1 }, 136.8);
+      tl.fromTo("#s9rho", { opacity: 0, y: 32 },
+        { opacity: 1, y: 0, duration: 0.55 }, 142.2);
+      tl.fromTo("#s9foot", { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.5 }, 145.4);
+
+      /* ---------- F10 · 165–180 title card ---------- */
+      tl.fromTo("#s10-title", { opacity: 0, y: 84 },
+        { opacity: 1, y: 0, duration: 0.42, ease: "power4.out" }, 165.4);
+      tl.fromTo("#s10-w1", { opacity: 0, y: 46 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, 165.8);
+      tl.fromTo("#s10-w2", { opacity: 0, y: 46 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, 166.02);
+      tl.fromTo("#s10-w3", { opacity: 0, y: 46 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, 166.2);
+      tl.fromTo("#s10-w4", { opacity: 0, y: 52 },
+        { opacity: 1, y: 0, duration: 0.32, ease: "power4.out" }, 166.34);
+      tl.fromTo("#s10-foot", { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.55 }, 167.8);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

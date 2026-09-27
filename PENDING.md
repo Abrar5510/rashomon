@@ -19,10 +19,14 @@ posts `CGEvent` mouse events; System Events clicks are blocked by TCC `-25211`, 
 `osascript` can only type). Files: `00_smoke_test`, `01_smoke_rashomon_skill`,
 `02_witness_run_done`, `03_approval_pending`, `04_score_report`, `05_clarifier_slugify`,
 `06_slugify_clarified_result`, `07_equiv_gate`, `08_permissions`, `09_custom_modes.jpg`.
-| **Still open:** `bob_sessions/` is git-ignored (`.gitignore` line 22), so the shots
-will not ride along with a push — un-ignore the directory or attach the files to the
-submission by hand. Also match `docs/VIDEO.md`'s naming (`taskNN_<desc>`) when cutting. |
-| A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | **Slides PDF (`docs/slides.pdf`, 8 pages incl. cover) ✅, cover image (`docs/cover.png`) ✅, statements filled with live numbers ✅ (27 Sep).** Remaining: the video — recording/editing in the IDE, outside a code build (storyboard ready in `docs/VIDEO.md`; `ffmpeg` present; ⚠️ free disk ~9.6 GB). | See `IDEAS.md` §Video and the plan's §8. |
+| **Resolved (27 Sep):** `bob_sessions/` is **tracked** — 23 files (10 screenshots +
+`clarified_artifacts/`) are committed and `.gitignore` no longer excludes it (the
+header of that file now says the folder is required for submission). Plan §9's
+`rashomon_taskNN_<desc>_summary.png` naming is satisfied by ten hard links of the
+same blobs — identical inode, so they cost **0 bytes** in the repo; the short
+`NN_…` names are kept because the references in this table and in `README.md`
+point at them. |
+| A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | **All four ✅ (27 Sep).** Slides PDF (`docs/slides.pdf`, 8 pages incl. cover), cover image (`docs/cover.png`), statements filled with live numbers, and the video: `video/my-video/renders/rashomon.mp4` — **1920×1080, 180.000 s, H.264 + AAC narration track, 9.7 MB** (spec: ≤3:00, <300 MB). **135 s of Bob running live** (spec: ≥90 s) from two real IDE recordings (`video/my-video/assets/take1.mov`, `take3.mov`), played in real time — no speed-ups, so no "2×" label is needed. Built with HyperFrames (`video/my-video/index.html`, storyboard in `video/my-video/STORYBOARD.md`, script in `docs/VIDEO.md`); `hyperframes check` passes with 0 errors; 43 repo tests pass. See §VIDEO-DEVIATION below for the one shot that changed. | See `IDEAS.md` §Video and the plan's §8. |
 
 ---
 
@@ -192,3 +196,29 @@ a greyed button is a stale request and silently no-ops.
   chips, guess box incl. abstention + tally, share link, fn.html good/bad id)
   passes a 29-check jsdom smoke test; the guess comparison matches Python's
   `score.same` on 1,941 generated pairs (0 mismatches).
+
+---
+
+## VIDEO-DEVIATION — one shot changed between the script and the delivered film
+
+`docs/VIDEO.md` is the script of record. Nine of its ten shots shipped exactly as
+written. One did not, because the number in the script was not true of the run:
+
+| Shot | Script said | Shipped | Why |
+|---|---|---|---|
+| 1:20–1:35 `make history` | "Three boundary-bug commits **on that function**" | "Every function in this repo carries a boundary-bug fix. Fixing the bug never fixed the confusion." — on screen: three real commits (`e12e3c6`, `dddce92`, `4101cc2`) under `git log · demo/target_repo`, plus the footer `9 / 9 functions carry a boundary-bug fix` and `parse_duration · 1 bug fix · 2 touching commits` | `rashomon_out/history.json` records **one** fix commit for `chronex/parsing.py::parse_duration` (`e12e3c6 fix: parse_duration ignored the 'd' suffix`), not three. Three bug-fixes on one function is a real, verified property — but of `boltons/dictutils.py::OrderedMultiDict.itervalues` (rank 1 on the live leaderboard, `bug_fixes: 3`), which is a different function from the one the 1:05 score shot is about. Claiming three on `parse_duration` would have been a fabricated number, so the line was rewritten to the true one and the narration re-recorded (`video/my-video/assets/narr/n6.wav`). `docs/VIDEO.md` §Shot list is updated to match the shipped film. |
+
+Two smaller, non-content notes:
+
+- **Footage is real-time.** `take1.mov` / `take3.mov` are played 1× with `data-media-start`
+  offsets, so no shot is sped up and the "label any speed-up 2×" rule never applies.
+- **Narration is offline.** Recorded with `hyperframes tts` (local Kokoro-82M, voice
+  `am_michael`) into `video/my-video/assets/narr/*.wav`, one clip per shot, mixed as an
+  `<audio>` track — never sped up.
+
+Not attempted (out of scope for one shot, listed so nobody looks for them):
+
+- `docs/VIDEO.md`'s screenshot naming checklist (`bob_sessions/rashomon_taskNN_<desc>_…`)
+  — the captures that exist are `bob_sessions/00…09_*` (see A5).
+- Any cloud/hosted render — rendered locally with `npx hyperframes render --workers 1`
+  (multi-worker needs ~5.6 GB of temp frames; this machine had ~2.6 GB free).
