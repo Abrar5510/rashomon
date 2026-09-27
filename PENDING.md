@@ -175,6 +175,13 @@ a greyed button is a stale request and silently no-ops.
   17 Clear, bug_fixes Spearman ρ = 0.394, p = 0.031, 95% CI [0.03, 0.71] *.
   Witness runs checkpoint after every function; a rerun resumes, and 6
   consecutive failures abort with the partial file kept.
+- **real PR gate on GitHub** (PRs [#1](https://github.com/Abrar5510/rashomon/pull/1) /
+  [#2](https://github.com/Abrar5510/rashomon/pull/2)): committed target
+  `examples/timelib.py` + interpreter-verified probes + live witnesses —
+  confusing rewrite measures 0% → 11% misreads and `make gate` exits **1**
+  (comment posted via `gh`), clarified rewrite measures 0% and exits **0**.
+  CI runs green on both with a notice (no model credential secret stored, by
+  design — local gate posts the comment).
 - `make boltons`: 61 candidates ranked across 19 modules (8 per module cap), pruned
   to the **30 that actually run**, 5 witness packets, history for all 30.
 - `make spike`: all local checks pass — Bob files present, YAML parses with the

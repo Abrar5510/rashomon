@@ -129,6 +129,23 @@ make merge score ROOT=targets/boltons OUT=out/boltons
 the skill's shape (`{"witness": k, "answers": [...]}`) or the flat
 `key#probe#persona` shape.
 
+## PR gate — demonstrated live on this repo
+
+Two exhibit PRs show the gate deciding for real (local `make gate`, comment
+posted with `gh`; CI skips its witness step because no model credential is
+stored as a secret — by design):
+
+- **[#1 – confusing refactor](https://github.com/Abrar5510/rashomon/pull/1)**
+  → 0% → **11% misreads** (4/35, Scattered) → gate comment posted, **exit 1** —
+  rejected. The docstring-only change to `clamp` in the same PR stayed Clear,
+  so only the genuinely harder function is flagged.
+- **[#2 – clarified rewrite](https://github.com/Abrar5510/rashomon/pull/2)**
+  → **0% misreads**, Clear → *"No readability regressions against the
+  baseline"*, **exit 0** — allowed.
+
+Both PRs run 5 live witnesses (`gemini-3.5-flash-lite`, temperature 0) over the
+committed probes in `examples/`, compared against `examples/baseline_results.json`.
+
 ## Layout
 
 ```
@@ -137,7 +154,7 @@ rashomon/            the library: astx, probes, runner, witnesses, score, stats,
 scripts/             thin CLIs: pick_functions, run_probes, score, bugfix_history,
                      build_leaderboard, rewatch, run_all, spike
 .bob/                custom modes, skills, the sealed canary
-tests/               41 pytest cases (grading, extraction, probes, history, packets,
+tests/               43 pytest cases (grading, extraction, probes, history, packets,
                      Wilson labels, correlation stats, sealed P′, name-lift, e2e)
 web/                 static leaderboard: index.html, fn.html, style.css,
                      common.js, app.js, fn.js, data.json
