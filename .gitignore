@@ -18,8 +18,8 @@ node_modules/
 # generated run artifacts — regenerate with `make demo`
 rashomon_out/
 
-# bob session scratch
-bob_sessions/
+# bob session evidence — committed for submission (screenshots + frozen artifacts)
+# bob_sessions/ is intentionally tracked
 
 # tool scratch
 .mimocode/

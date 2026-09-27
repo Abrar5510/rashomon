@@ -22,7 +22,7 @@ posts `CGEvent` mouse events; System Events clicks are blocked by TCC `-25211`, 
 | **Still open:** `bob_sessions/` is git-ignored (`.gitignore` line 22), so the shots
 will not ride along with a push — un-ignore the directory or attach the files to the
 submission by hand. Also match `docs/VIDEO.md`'s naming (`taskNN_<desc>`) when cutting. |
-| A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | Recording/editing work in the IDE, outside a code build. | See `IDEAS.md` §Video and the plan's §8. |
+| A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | **Slides PDF (`docs/slides.pdf`, 8 pages incl. cover) ✅, cover image (`docs/cover.png`) ✅, statements filled with live numbers ✅ (27 Sep).** Remaining: the video — recording/editing in the IDE, outside a code build (storyboard ready in `docs/VIDEO.md`; `ffmpeg` present; ⚠️ free disk ~9.6 GB). | See `IDEAS.md` §Video and the plan's §8. |
 
 ---
 

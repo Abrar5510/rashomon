@@ -17,9 +17,11 @@ titled **RASHOMON: unit tests for readability**. 16:9.
    harness executes probe inputs, grades the predictions, and `git log` supplies
    the fix history.
 
-4. **Results.** On the bundled demo: 9 functions, 5 readers, 135 graded
-   predictions, 21 wrong. `parse_duration` misleads 7 of 15 readings while `mean`
-   is read correctly by all five — with no human label anywhere in the system.
+4. **Results.** Live run on 30 `boltons` functions, 5 readers, 410 predictions:
+   9 consensus-misread, 4 scattered, 17 clear — and misread rate tracks real
+   bug-fix history (Spearman ρ = 0.394, p = 0.031). On the demo, `parse_duration`
+   misleads 7 of 15 readings while `mean` is read correctly by all five, with no
+   human label anywhere in the system.
 
 5. **PR gate.** `make gate` writes a pull-request comment with a misread rate per
    function and fails only when a change makes code *more* confusing. Readability

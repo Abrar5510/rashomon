@@ -1,0 +1,26 @@
+{
+  "chronex/text.py::slugify#0#careful-stylist": "'hello-world'",
+  "chronex/text.py::slugify#1#careful-stylist": "'a-b'",
+  "chronex/text.py::slugify#2#careful-stylist": "'ünïcode-42'",
+  "chronex/text.py::slugify#0#speed-reader": "'hello-world'",
+  "chronex/text.py::slugify#1#speed-reader": "'a-b'",
+  "chronex/text.py::slugify#2#speed-reader": "'ünïcode-42'",
+  "chronex/text.py::slugify#0#regex-allergic": "'hello-world'",
+  "chronex/text.py::slugify#1#regex-allergic": "'a-b'",
+  "chronex/text.py::slugify#2#regex-allergic": "'ünïcode-42'",
+  "chronex/text.py::slugify#0#api-historian": "'hello-world'",
+  "chronex/text.py::slugify#1#api-historian": "'a-b'",
+  "chronex/text.py::slugify#2#api-historian": "'ünïcode-42'",
+  "chronex/text.py::slugify#0#edge-case-hunter": "'hello-world'",
+  "chronex/text.py::slugify#1#edge-case-hunter": "'a-b'",
+  "chronex/text.py::slugify#2#edge-case-hunter": "'ünïcode-42'",
+  "__summaries__": {
+    "chronex/text.py::slugify": {
+      "careful-stylist": "Converts text to lowercase URL-safe slug by keeping alphanumerics and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens.",
+      "speed-reader": "Converts text to URL-safe lowercase slug by keeping alphanumerics and collapsing non-alphanumeric sequences to single hyphens, then stripping edge hyphens.",
+      "regex-allergic": "Converts text to lowercase URL-safe slug by keeping alphanumerics and collapsing non-alphanumeric runs into single hyphens, then stripping leading/trailing hyphens.",
+      "api-historian": "Converts text to lowercase URL-safe slug by keeping alphanumeric characters and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens.",
+      "edge-case-hunter": "Converts text to lowercase URL-safe slug by collapsing non-alphanumeric sequences into single hyphens and stripping leading/trailing hyphens."
+    }
+  }
+}

@@ -1,0 +1,167 @@
+[
+  {
+    "key": "chronex/text.py::slugify",
+    "n_probes": 3,
+    "n_witnesses": 5,
+    "predictions": 15,
+    "misreads": 0,
+    "misread_rate": 0.0,
+    "ci_lo": 0.0,
+    "ci_hi": 0.2039,
+    "consensus_wrong": 0,
+    "disagreement_mean": 1.0,
+    "disagreement_max": 1,
+    "witnesses_correct": 5,
+    "witnesses_correct_of": 5,
+    "witnesses_clean": [
+      "careful-stylist",
+      "speed-reader",
+      "regex-allergic",
+      "api-historian",
+      "edge-case-hunter"
+    ],
+    "label": "Clear",
+    "verdict": "clear",
+    "probes": [
+      {
+        "input": {
+          "args": [
+            "Hello, World!"
+          ],
+          "kwargs": {}
+        },
+        "label": "punctuation",
+        "actual": "'hello-world'",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "'hello-world'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumerics and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "'hello-world'",
+            "correct": true,
+            "summary": "Converts text to URL-safe lowercase slug by keeping alphanumerics and collapsing non-alphanumeric sequences to single hyphens, then stripping edge hyphens."
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "'hello-world'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumerics and collapsing non-alphanumeric runs into single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "'hello-world'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumeric characters and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "'hello-world'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by collapsing non-alphanumeric sequences into single hyphens and stripping leading/trailing hyphens."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [
+            "  a  --  b  "
+          ],
+          "kwargs": {}
+        },
+        "label": "repeats",
+        "actual": "'a-b'",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "'a-b'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumerics and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "'a-b'",
+            "correct": true,
+            "summary": "Converts text to URL-safe lowercase slug by keeping alphanumerics and collapsing non-alphanumeric sequences to single hyphens, then stripping edge hyphens."
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "'a-b'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumerics and collapsing non-alphanumeric runs into single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "'a-b'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumeric characters and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "'a-b'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by collapsing non-alphanumeric sequences into single hyphens and stripping leading/trailing hyphens."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [
+            "Ünïcode 42"
+          ],
+          "kwargs": {}
+        },
+        "label": "unicode",
+        "actual": "'ünïcode-42'",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "'ünïcode-42'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumerics and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "'ünïcode-42'",
+            "correct": true,
+            "summary": "Converts text to URL-safe lowercase slug by keeping alphanumerics and collapsing non-alphanumeric sequences to single hyphens, then stripping edge hyphens."
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "'ünïcode-42'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumerics and collapsing non-alphanumeric runs into single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "'ünïcode-42'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by keeping alphanumeric characters and replacing runs of non-alphanumeric characters with single hyphens, then stripping leading/trailing hyphens."
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "'ünïcode-42'",
+            "correct": true,
+            "summary": "Converts text to lowercase URL-safe slug by collapsing non-alphanumeric sequences into single hyphens and stripping leading/trailing hyphens."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      }
+    ],
+    "path": "chronex/text.py",
+    "qualname": "slugify",
+    "signature": "slugify(text)",
+    "source": "def slugify(text):\n    \"\"\"Turn arbitrary text into a url-safe slug.\"\"\"\n    out = []\n    for ch in text.lower():\n        if ch.isalnum():\n            out.append(ch)\n        else:\n            if out and out[-1] != \"-\":\n                out.append(\"-\")\n    return \"\".join(out).strip(\"-\")",
+    "docstring": "Turn arbitrary text into a url-safe slug.",
+    "n_lines": 10,
+    "rank": 1
+  }
+]
