@@ -1,0 +1,560 @@
+[
+  {
+    "key": "examples/timelib.py::clamp",
+    "n_probes": 4,
+    "n_witnesses": 5,
+    "predictions": 20,
+    "misreads": 0,
+    "misread_rate": 0.0,
+    "ci_lo": 0.0,
+    "ci_hi": 0.1611,
+    "consensus_wrong": 0,
+    "disagreement_mean": 1.0,
+    "disagreement_max": 1,
+    "witnesses_correct": 5,
+    "witnesses_correct_of": 5,
+    "witnesses_clean": [
+      "careful-stylist",
+      "speed-reader",
+      "regex-allergic",
+      "api-historian",
+      "edge-case-hunter"
+    ],
+    "label": "Clear",
+    "verdict": "clear",
+    "probes": [
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "value": 5.0,
+            "low": 0.0,
+            "high": 10.0
+          }
+        },
+        "label": "typical",
+        "actual": "5.0",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "5.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive low and high range."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "5.0",
+            "correct": true,
+            "summary": "clamps a numeric value within a specified inclusive range"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "5.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "5.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive range [low, high]"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "5.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "value": -3.0,
+            "low": 0.0,
+            "high": 10.0
+          }
+        },
+        "label": "typical",
+        "actual": "0.0",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive low and high range."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "clamps a numeric value within a specified inclusive range"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive range [low, high]"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "value": 15.0,
+            "low": 0.0,
+            "high": 10.0
+          }
+        },
+        "label": "typical",
+        "actual": "10.0",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "10.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive low and high range."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "10.0",
+            "correct": true,
+            "summary": "clamps a numeric value within a specified inclusive range"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "10.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "10.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive range [low, high]"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "10.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "value": 0.0,
+            "low": 0.0,
+            "high": 0.0
+          }
+        },
+        "label": "typical",
+        "actual": "0.0",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive low and high range."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "clamps a numeric value within a specified inclusive range"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a floating-point value within an inclusive range [low, high]"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "0.0",
+            "correct": true,
+            "summary": "Clamps a numeric value within a specified inclusive range."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      }
+    ],
+    "path": "examples/timelib.py",
+    "qualname": "clamp",
+    "signature": "clamp(value: float, low: float, high: float) -> float",
+    "source": "def clamp(value: float, low: float, high: float) -> float:\n    \"\"\"Clamp value into the inclusive range [low, high].\"\"\"\n    if value < low:\n        return low\n    if value > high:\n        return high\n    return value",
+    "docstring": "Clamp value into the inclusive range [low, high].",
+    "n_lines": 7,
+    "rank": 1
+  },
+  {
+    "key": "examples/timelib.py::parse_duration",
+    "n_probes": 7,
+    "n_witnesses": 5,
+    "predictions": 35,
+    "misreads": 0,
+    "misread_rate": 0.0,
+    "ci_lo": 0.0,
+    "ci_hi": 0.0989,
+    "consensus_wrong": 0,
+    "disagreement_mean": 1.0,
+    "disagreement_max": 1,
+    "witnesses_correct": 5,
+    "witnesses_correct_of": 5,
+    "witnesses_clean": [
+      "careful-stylist",
+      "speed-reader",
+      "regex-allergic",
+      "api-historian",
+      "edge-case-hunter"
+    ],
+    "label": "Clear",
+    "verdict": "clear",
+    "probes": [
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "1h30m"
+          }
+        },
+        "label": "typical",
+        "actual": "5400",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "5400",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "5400",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "5400",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "5400",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "5400",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "90"
+          }
+        },
+        "label": "typical",
+        "actual": "90",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "90",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "90",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "90",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "90",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "90",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "2h"
+          }
+        },
+        "label": "typical",
+        "actual": "7200",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "7200",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "7200",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "7200",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "7200",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "7200",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "45s"
+          }
+        },
+        "label": "typical",
+        "actual": "45",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "45",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "45",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "45",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "45",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "45",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "1h30m30s"
+          }
+        },
+        "label": "typical",
+        "actual": "5430",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "5430",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "5430",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "5430",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "5430",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "5430",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "0"
+          }
+        },
+        "label": "typical",
+        "actual": "0",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "0",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "0",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "0",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "0",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "0",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      },
+      {
+        "input": {
+          "args": [],
+          "kwargs": {
+            "text": "  10m  "
+          }
+        },
+        "label": "typical",
+        "actual": "600",
+        "cards": [
+          {
+            "witness": "careful-stylist",
+            "prediction": "600",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          },
+          {
+            "witness": "speed-reader",
+            "prediction": "600",
+            "correct": true,
+            "summary": "parses a duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "regex-allergic",
+            "prediction": "600",
+            "correct": true,
+            "summary": "parses a time duration string containing hours, minutes, and seconds into total seconds"
+          },
+          {
+            "witness": "api-historian",
+            "prediction": "600",
+            "correct": true,
+            "summary": "Parse a duration string into total seconds"
+          },
+          {
+            "witness": "edge-case-hunter",
+            "prediction": "600",
+            "correct": true,
+            "summary": "Parses a duration string containing hours, minutes, and seconds into total seconds."
+          }
+        ],
+        "distinct_answers": 1,
+        "wrong": 0
+      }
+    ],
+    "path": "examples/timelib.py",
+    "qualname": "parse_duration",
+    "signature": "parse_duration(text: str) -> int",
+    "source": "def parse_duration(text: str) -> int:\n    \"\"\"Parse a duration like '1h30m' into whole seconds.\"\"\"\n    weights = {\"h\": 3600, \"m\": 60, \"s\": 1}\n    seconds = 0\n    digits = \"\"\n    for ch in text:\n        if ch.isdigit():\n            digits += ch\n        elif ch in weights and digits:\n            seconds += int(digits) * weights[ch]\n            digits = \"\"\n    if digits:\n        seconds += int(digits)\n    return seconds",
+    "docstring": "Parse a duration like '1h30m' into whole seconds.",
+    "n_lines": 14,
+    "rank": 2
+  }
+]
