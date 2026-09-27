@@ -1,0 +1,1 @@
+Fifty-eight percent of development time is spent reading code. A hundred and twenty-one metrics have been proposed, and none of them track what humans think. Ask a model instead, and it correlates with people at roughly zero. So we stopped asking.

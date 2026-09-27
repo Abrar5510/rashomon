@@ -1,0 +1,1 @@
+CRUXEval uses code to grade models. Rashomon uses models to grade code. Five readers disagreeing means it is unclear. Readability was an opinion. Now it is a test.

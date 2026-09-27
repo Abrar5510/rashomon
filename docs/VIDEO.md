@@ -15,16 +15,16 @@ predictions `1h30m` (api-historian), `5400` (careful-stylist), `5400`
 
 | Time | Shot | On screen | Narration |
 |---|---|---|---|
-| 0:00–0:12 | Cold open, five cards face down | `parse_duration('1h30m') → ?` Cards flip: `'1h30m'` · `5400` · `5400` · `3600` · `90`. Then the real run prints `5400`. | "What does this return? Five readers. Three different answers. Only one of them is right — and we can prove it, because we ran the code." |
-| 0:12–0:30 | Three title cards | `58% of dev time is reading code` · `121 readability metrics, none of them track people` · `ask an LLM if code is readable: ρ ≈ 0` | "Fifty-eight percent of development time goes to understanding code. One hundred and twenty-one proposed metrics don't track what humans think. And asking a model 'is this readable?' correlates with people at basically zero. So we stopped asking." |
-| 0:30–0:45 | Bob Tasks → mode `rashomon` | Modes list showing `rashomon` / `probesmith` / `clarifier`; skill fires | "This is Bob. Mode rashomon picks up one witness packet." |
-| 0:45–1:05 | **Parallel panel, 5 explore subagents** | Five `explore` cards running at once, one tool call each; label `fork_context: false` | "Five isolated readers fork their own context — no groupthink — each gets one tool call: read the function, predict the output. They never see the answers." |
-| 1:05–1:20 | `make score` | Verdict card: `parse_duration — 7/15 misread, 47%` | "Then we run it. This one misleads seven of fifteen readings." |
-| 1:20–1:35 | `make history` | Three real boundary-bug commits under `git log · demo/target_repo` (`e12e3c6`, `dddce92`, `4101cc2`), then the footer `9 / 9 functions carry a boundary-bug fix` and `parse_duration · 1 bug fix · 2 touching commits` | "Every function in this repo carries a boundary-bug fix. Fixing the bug never fixed the confusion." *(shipped line — see `PENDING.md` §VIDEO-DEVIATION; the draft said "three commits on that function", which `rashomon_out/history.json` does not support)* |
-| 1:35–2:00 | Mode `clarifier` + `make equiv` | Rewrite lands in `rashomon_out/clarified/`, then `15/15 identical` (label the count from the run) | "The clarifier rewrites it — into a copy, not the real file — and equivalence proves the behaviour didn't move before we judge the new wording." |
-| 2:00–2:15 | `make rewatch` + PR comment | Before/after misread rate; the gate comment appearing | "Fresh readers, and the gate posts what changed to the pull request." |
-| 2:15–2:45 | Leaderboard + scatter | Live site, misread rate vs bug-fix count | "Functions ranked by how often real readers disagree, with their fix history on top. Readability is now a number you can regress." |
-| 2:45–3:00 | Title card | `RASHOMON — unit tests for readability` | "CRUXEval uses code to grade models. Rashomon uses models to grade code. Readability was an opinion. Now it's a test." |
+| 0:00–0:12 | Cold open, five cards face down | `parse_duration('1h30m') → ?` Cards flip: `'1h30m'` · `5400` · `5400` · `3600` · `90`. Then the real run prints `5400`. | “What does this return? Five readers, three answers, only one right, and we know which, because we ran the code. Predict the output, then run the function.” |
+| 0:12–0:30 | Three title cards | `58% of dev time is reading code` · `121 readability metrics, none of them track people` · `ask an LLM if code is readable: ρ ≈ 0` | “Fifty-eight percent of development time is spent reading code. A hundred and twenty-one metrics have been proposed, and none of them track what humans think. Ask a model instead, and it correlates with people at roughly zero. So we stopped asking.” |
+| 0:30–0:45 | Bob Tasks → mode `rashomon` | Modes list showing `rashomon` / `probesmith` / `clarifier`; skill fires | “This is Bob. The rashomon mode picks up one witness packet: the function, its probe inputs, and nothing else. No answers, no history, no hint of what the right output looks like.” |
+| 0:45–1:05 | **Parallel panel, 5 explore subagents** | Five `explore` cards running at once, one tool call each; label `fork_context: false` | “Five readers fork their own context, so they cannot influence each other. No groupthink. Each gets exactly one tool call: read the function, predict what it returns, then stop. They never see the real output, each other, or the answer key.” |
+| 1:05–1:20 | `make score` | Verdict card: `parse_duration — 7/15 misread, 47%` | “Then we execute it. This function fooled seven of fifteen readings: one reader said thirty-six hundred when the answer was fifty-four hundred. That disagreement is the measurement.” |
+| 1:20–1:35 | `make history` | Three real boundary-bug commits under `git log · demo/target_repo` (`e12e3c6`, `dddce92`, `4101cc2`), then the footer `9 / 9 functions carry a boundary-bug fix` and `parse_duration · 1 bug fix · 2 touching commits` | “Nine of nine functions here carry a boundary-bug fix, and they still mislead readers. Fixing the bug never fixed the confusion. The confusion was never in the behaviour. It was in the code.” *(shipped line — see `PENDING.md` §VIDEO-DEVIATION)* |
+| 1:35–2:00 | Mode `clarifier` + `make equiv` | Rewrite lands in `rashomon_out/clarified/`, then `15/15 identical` (label the count from the run) | “So the clarifier takes a swing. It reads the confusing function and writes a plainer version into a copy, never the real file. Then we prove the behaviour did not move: fifteen probes, fifteen identical results, before anyone is allowed to judge the new wording. If a rewrite changes a single return value, that is a bug fix, not a rewrite.” |
+| 2:00–2:15 | `make rewatch` + PR comment | Before/after misread rate; the gate comment appearing | “Then fresh readers, with no memory of the first pass, score the clarified copy. Before: seven of fifteen misled. After: nobody. And the gate posts that change to the pull request.” |
+| 2:15–2:45 | Leaderboard + scatter | Live site, misread rate vs bug-fix count | “Thirty functions from a real library, ranked by how often independent readers disagree, and every row carries its own bug-fix history. The correlation with past fixes is not zero: point three nine, with a p-value of point naught three. The top row misleads every reader and has three historical bug fixes. Readability is now a number you can regress on.” |
+| 2:45–3:00 | Title card | `RASHOMON — unit tests for readability` | “CRUXEval uses code to grade models. Rashomon uses models to grade code. Five readers disagreeing means it is unclear. Readability was an opinion. Now it is a test.” |
 
 ---
 
@@ -48,25 +48,44 @@ consumption summary:
 ## Assembly
 
 **Delivered:** `video/my-video/renders/rashomon.mp4` — 1920×1080, 30 fps,
-**180.000 s**, H.264 + AAC, **9.7 MB** (spec: ≤ 3:00, < 300 MB), narration as a
-mixed audio track.
+**180.000 s**, H.264 + AAC, **14.9 MB** (spec: ≤ 3:00, < 300 MB), narration as a
+mixed audio track. 694 kbps average — plenty for a dark UI composition.
 
 Built as a HyperFrames composition, not a concat: `video/my-video/index.html`
-(ten scenes on one paused GSAP timeline), storyboard in
-`video/my-video/STORYBOARD.md`, footage + narration in `video/my-video/assets/`.
+(ten scenes on one paused GSAP timeline, `hyperframes check` → 0 errors),
+storyboard in `video/my-video/STORYBOARD.md`, footage + narration in
+`video/my-video/assets/`.
+
+**Footage.** One 260 s real-time recording of the Bob IDE,
+`assets/take4.mov`, cut into three 1× windows on track 1 —
+`#vid-a` 30–80 s (media 7 s), `#vid-b` 80–122 s (media 95 s),
+`#vid-c` 122–165 s (media 211 s) — **135 s of Bob running live** (spec: ≥ 90 s).
+Real-time, never sped up → the "label any speed-up 2×" rule never applies.
+Captured with `scripts/record_window.swift` (compiled to `scripts/record_window`,
+git-ignored), prompt sent at 7.6 s of the take, no approval stalls (permissions
+pre-allowed everything).
+
+**Narration.** Ten clips generated offline with local Kokoro-82M (voice
+`am_michael`) by `video/my-video/make_narration.py`, which holds the shipped
+script in `LINES`, checks each clip against its scene budget and writes
+`assets/narr/*.wav` + `*.txt` + `durations.json`. **151.2 s of speech in 180 s
+(84%)** — the first cut spoke for only 82 s and left 98 s of silence; the copy
+was rewritten (not sped up) and the longest gap is now 5.9 s. Clips land at
+0.8 / 12.6 / 30.6 / 45.4 / 65.6 / 80.6 / 95.6 / 120.6 / 135.6 / 166.0 s
+(verified against the rendered track with `silencedetect`).
 
 ```bash
 cd video/my-video
-npx hyperframes check          # 0 errors
-# 450 kbps average — plenty for a dark UI composition; far under the 300 MB cap
+npx hyperframes check          # 0 errors (warnings only)
 npx hyperframes render --workers 1 --video-frame-format png --crf 22 \
   --skill general-video -o renders/rashomon.mp4
 ffprobe -v error -show_entries format=duration,size -of csv renders/rashomon.mp4
+ffmpeg -i renders/rashomon.mp4 -af silencedetect=noise=-35dB:d=1.0 -f null -
 ```
 
 `--workers 1` is required on this machine: the default multi-worker path buffers
-every frame to disk (~5.6 GB for 5,400 frames) and fails here, while a single
-worker streams straight into the encoder.
+every frame to disk (~5.6 GB for 5,400 frames). Disk was also tight during this
+build — the renderer refuses under ~1 GB free, and `npm cache clean --force`
+reclaimed enough to run.
 
-Narration is recorded separately (`hyperframes tts`, local Kokoro-82M) and mixed
-in as ten `<audio>` clips — one per shot, never sped up.
+QA frames of the delivered cut are in `video/my-video/snapshots/v2/`.

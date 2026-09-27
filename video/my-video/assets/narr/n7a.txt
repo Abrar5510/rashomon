@@ -1,0 +1,1 @@
+So the clarifier takes a swing. It reads the confusing function and writes a plainer version into a copy, never the real file. Then we prove the behaviour did not move: fifteen probes, fifteen identical results, before anyone is allowed to judge the new wording. If a rewrite changes a single return value, that is a bug fix, not a rewrite.

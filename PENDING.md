@@ -26,7 +26,7 @@ header of that file now says the folder is required for submission). Plan §9's
 same blobs — identical inode, so they cost **0 bytes** in the repo; the short
 `NN_…` names are kept because the references in this table and in `README.md`
 point at them. |
-| A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | **All four ✅ (27 Sep).** Slides PDF (`docs/slides.pdf`, 8 pages incl. cover), cover image (`docs/cover.png`), statements filled with live numbers, and the video: `video/my-video/renders/rashomon.mp4` — **1920×1080, 180.000 s, H.264 + AAC narration track, 9.7 MB** (spec: ≤3:00, <300 MB). **135 s of Bob running live** (spec: ≥90 s) from two real IDE recordings (`video/my-video/assets/take1.mov`, `take3.mov`), played in real time — no speed-ups, so no "2×" label is needed. Built with HyperFrames (`video/my-video/index.html`, storyboard in `video/my-video/STORYBOARD.md`, script in `docs/VIDEO.md`); `hyperframes check` passes with 0 errors; 43 repo tests pass. See §VIDEO-DEVIATION below for the one shot that changed. | See `IDEAS.md` §Video and the plan's §8. |
+| A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | **All four ✅ (27 Sep).** Slides PDF (`docs/slides.pdf`, 8 pages incl. cover), cover image (`docs/cover.png`), statements filled with live numbers, and the video: `video/my-video/renders/rashomon.mp4` — **1920×1080, 180.000 s, H.264 + AAC narration track, 14.9 MB** (spec: ≤3:00, <300 MB). **135 s of Bob running live** (spec: ≥90 s) from one real 260 s IDE recording (`video/my-video/assets/take4.mov`) cut into three 1× windows, played in real time — no speed-ups, so no "2×" label is needed. Narration is **151.2 s of speech (84%)** across ten offline-generated clips (`video/my-video/make_narration.py` → `assets/narr/`); the first cut (9.7 MB, `take1`+`take3`, 82 s of speech / 98 s of silence) was re-cut after a pacing review. Built with HyperFrames (`video/my-video/index.html`, storyboard in `video/my-video/STORYBOARD.md`, script in `docs/VIDEO.md`); `hyperframes check` passes with 0 errors; 43 repo tests pass. See §VIDEO-DEVIATION below for the one shot that changed. | See `IDEAS.md` §Video and the plan's §8. |
 
 ---
 
@@ -72,7 +72,7 @@ point at them. |
 | D6 | **Iterator / generator returns** | Results with a `__next__` are materialised up to whatever `repr()` gives; results whose repr contains `0x` or starts with `<` are dropped as unstable. | |
 | D7 | **Python only** | JS/TS is explicitly a gated stretch goal and was not attempted. | |
 | D8 | **`rashomon_out/` is regenerated output** | **Resolved** — `rashomon_out/` and `bob_sessions/` are git-ignored; `web/data.json` stays tracked so the site works from a fresh clone. | Regenerate with `make demo`. |
-| D9 | **Disk space** | The plan warns the machine had **1.3 GB free**, which is not enough to record video. | Free ≥20 GB before recording. Not checked in this session. |
+| D9 | **Disk space** | The plan warns the machine had **1.3 GB free**, which is not enough to record video. | Free ≥20 GB before recording. **Bit twice during the video build:** recording needed space, and the second render refused to start at 0.8 GB free (recovered with `npm cache clean --force`, which returned ~31 GB of purgeable space). |
 
 ---
 
@@ -210,8 +210,17 @@ written. One did not, because the number in the script was not true of the run:
 
 Two smaller, non-content notes:
 
-- **Footage is real-time.** `take1.mov` / `take3.mov` are played 1× with `data-media-start`
-  offsets, so no shot is sped up and the "label any speed-up 2×" rule never applies.
+- **Footage is real-time.** `take4.mov` (a fresh 260 s recording of the Bob IDE, prompt
+  sent at 7.6 s, zero approval stalls because permissions were pre-allowed) is played 1×
+  with `data-media-start` offsets across three windows, so no shot is sped up and the
+  "label any speed-up 2×" rule never applies. It replaced `take1.mov` / `take3.mov`,
+  which are still in the repo as the first cut's source.
+- **Pacing re-cut (27 Sep, second pass).** The first render was 54% silence (97.7 s of
+  gaps, up to 21 s between lines). The ten narration lines were rewritten (same facts,
+  more words per beat) and regenerated offline, the footage was re-cut around the busy
+  stretches of `take4.mov`, and the motion pass added scene blur-ins, a light sweep on
+  every cut and accent rules. Speech went 82 s → **151.2 s (84%)**; the longest gap is
+  now 5.9 s.
 - **Narration is offline.** Recorded with `hyperframes tts` (local Kokoro-82M, voice
   `am_michael`) into `video/my-video/assets/narr/*.wav`, one clip per shot, mixed as an
   `<audio>` track — never sped up.
@@ -221,4 +230,5 @@ Not attempted (out of scope for one shot, listed so nobody looks for them):
 - `docs/VIDEO.md`'s screenshot naming checklist (`bob_sessions/rashomon_taskNN_<desc>_…`)
   — the captures that exist are `bob_sessions/00…09_*` (see A5).
 - Any cloud/hosted render — rendered locally with `npx hyperframes render --workers 1`
-  (multi-worker needs ~5.6 GB of temp frames; this machine had ~2.6 GB free).
+  (multi-worker needs ~5.6 GB of temp frames; the machine was down to **0.8 GB free**
+  during the re-cut and needed `npm cache clean --force` before the renderer would run).

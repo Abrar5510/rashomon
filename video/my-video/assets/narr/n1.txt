@@ -1,0 +1,1 @@
+What does this return? Five readers, three answers, only one right, and we know which, because we ran the code. Predict the output, then run the function.

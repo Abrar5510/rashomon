@@ -104,6 +104,22 @@
         letter-spacing: .04em; margin-bottom: 20px;
       }
       .panel-h b { color: var(--accent); font-weight: 600; }
+      .panel > .rule {
+        display: block;
+        height: 2px;
+        margin: 9px 0 15px;
+        background: linear-gradient(90deg, var(--accent) 0%, rgba(255, 180, 84, 0.55) 34%, rgba(255, 180, 84, 0) 100%);
+        transform-origin: 0 50%;
+      }
+      #sweep {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(104deg,
+          rgba(255, 180, 84, 0) 38%,
+          rgba(255, 214, 160, 0.13) 50%,
+          rgba(255, 180, 84, 0) 62%);
+        transform: translateX(-130%);
+      }
 
       /* ---------- F1 cold open ---------- */
       .co { position: absolute; inset: 0; display: flex; flex-direction: column;
@@ -340,15 +356,22 @@
         <div id="grain"></div>
       </div>
 
-      <!-- ============ track 1 · live Bob footage ============ -->
+      <!-- ============ track 1 · live Bob footage (take4, active windows only) ============ -->
       <video
-        id="vid-a" src="assets/take1.mov" muted
-        data-start="30" data-duration="35" data-media-start="5" data-track-index="1"
+        id="vid-a" src="assets/take4.mov" muted
+        data-start="30" data-duration="50" data-media-start="7" data-track-index="1"
       ></video>
       <video
-        id="vid-b" src="assets/take3.mov" muted
-        data-start="65" data-duration="100" data-media-start="0" data-track-index="1"
+        id="vid-b" src="assets/take4.mov" muted
+        data-start="80" data-duration="42" data-media-start="95" data-track-index="1"
       ></video>
+      <video
+        id="vid-c" src="assets/take4.mov" muted
+        data-start="122" data-duration="43" data-media-start="211" data-track-index="1"
+      ></video>
+
+      <!-- ============ track 5 · transition light (over scenes) ============ -->
+      <div id="sweep" class="clip" data-start="0" data-duration="180" data-track-index="5"></div>
 
       <!-- ============ track 2 · scenes ============ -->
 
@@ -422,6 +445,7 @@
         <div class="scrim-l"></div>
         <div class="panel" id="s3p">
           <div class="panel-h">IBM Bob · custom modes</div>
+          <i class="rule"></i>
           <div class="mode on">🎭 &nbsp;rashomon<span class="on-tag">active</span></div>
           <div class="mode">🧪 &nbsp;probesmith</div>
           <div class="mode">🔍 &nbsp;clarifier</div>
@@ -448,6 +472,7 @@
         <div class="scrim-l"></div>
         <div class="panel" id="s5p">
           <div class="panel-h">chronex/parsing.py::parse_duration &nbsp;·&nbsp; <b>make score</b></div>
+          <i class="rule"></i>
           <div class="big"><span class="n" id="c5">0</span><span class="pc">%</span></div>
           <div class="big-label">misread</div>
           <div class="bar"><span id="s5bar"></span></div>
@@ -463,6 +488,7 @@
         <div class="scrim-l"></div>
         <div class="panel" id="s6p">
           <div class="panel-h">git log &nbsp;·&nbsp; demo/target_repo</div>
+          <i class="rule"></i>
           <div class="commit"><span class="sha">e12e3c6</span><span class="subj">fix: parse_duration ignored the 'd' suffix</span></div>
           <div class="commit"><span class="sha">dddce92</span><span class="subj">fix: slugify produced repeated dashes</span></div>
           <div class="commit"><span class="sha">4101cc2</span><span class="subj">fix: is_palindrome choked on punctuation</span></div>
@@ -478,12 +504,14 @@
         <div class="scrim-l"></div>
         <div class="panel" id="s7a">
           <div class="panel-h">mode <b>clarifier</b> &nbsp;·&nbsp; chronex/text.py::slugify</div>
+          <i class="rule"></i>
           <div class="kv"><span class="k">writes to</span><span class="v">rashomon_out/clarified/</span></div>
           <div class="kv"><span class="k">real source file</span><span class="v good">untouched</span></div>
           <div class="mono-note">Rewrite into a copy — we only judge the new wording after the behaviour is proven identical.</div>
         </div>
         <div class="panel" id="s7b">
           <div class="panel-h"><b>make equiv</b></div>
+          <i class="rule"></i>
           <div><span class="equiv" id="c7">0</span><span class="equiv" style="color:var(--muted)"> / 15</span></div>
           <div class="equiv-sub">identical outputs on every probe · equivalence gate passed</div>
         </div>
@@ -494,6 +522,7 @@
         <div class="scrim-l"></div>
         <div class="panel" id="s8a">
           <div class="panel-h"><b>make rewatch</b> &nbsp;·&nbsp; chronex/text.py::slugify</div>
+          <i class="rule"></i>
           <div class="kv"><span class="k">misread rate</span><span class="v"><span style="color:var(--bad)">13%</span> <span class="arrow-move">→</span> <span style="color:var(--good)">0%</span></span></div>
           <div class="kv"><span class="k">misreads</span><span class="v">2/15 <span class="arrow-move">→</span> 0/15</span></div>
           <div class="kv"><span class="k">clean witnesses</span><span class="v good">3/5 <span class="arrow-move">→</span> 5/5</span></div>
@@ -501,6 +530,7 @@
         </div>
         <div class="panel" id="s8b">
           <div class="panel-h">make gate &nbsp;·&nbsp; comment posted on the pull request</div>
+          <i class="rule"></i>
           <div class="kv"><span class="k">function</span><span class="v">slugify (chronex/text.py)</span></div>
           <div class="kv"><span class="k">misreads (95% CI)</span><span class="v good">0/15 (0%–20%)</span></div>
           <div class="kv"><span class="k">clean witnesses</span><span class="v">5/5</span></div>
@@ -594,7 +624,7 @@
     </div>
 
     <script>
-      const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+      const tl = gsap.timeline({ paused: true, defaults: { ease: "expo.out" } });
 
       /* ---------- track 0 · backdrop ambient (finite, seek-safe) ---------- */
       tl.fromTo("#rings", { x: -50, rotation: 0 }, { x: 50, rotation: 14, duration: 180, ease: "none" }, 0);
@@ -604,119 +634,141 @@
         { opacity: 0.4, duration: 4, ease: "sine.inOut", yoyo: true, repeat: 44 }, 0);
       tl.fromTo("#hair", { scaleX: 0 }, { scaleX: 1, duration: 2.4, ease: "power4.out" }, 0.3);
 
+      /* ---------- scene dissolves: blur-in, dissolve-out, light sweep on the cut ---------- */
+      const SC = [
+        ["#s1", 0, 12], ["#s2", 12, 30], ["#s3", 30, 45], ["#s4", 45, 65], ["#s5", 65, 80],
+        ["#s6", 80, 95], ["#s7", 95, 120], ["#s8", 120, 135], ["#s9", 135, 165], ["#s10", 165, 180],
+      ];
+      SC.forEach(([sel, a, b], i) => {
+        tl.fromTo(sel, { opacity: 0, scale: 1.035, filter: "blur(18px)" },
+          { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.65, ease: "expo.out" }, a + 0.04);
+        tl.to(sel, { opacity: 0, duration: 0.3, ease: "power2.in" }, b - 0.3);
+        if (i > 0) {
+          tl.fromTo("#sweep", { xPercent: -130 },
+            { xPercent: 130, duration: 0.62, ease: "power2.inOut" }, a - 0.3);
+        }
+      });
+
       /* ---------- F1 · 0–12 cold open ---------- */
-      tl.fromTo("#s1-k", { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.35, ease: "power4.out" }, 0.25);
-      tl.fromTo("#s1-code", { opacity: 0, y: 46 },
-        { opacity: 1, y: 0, duration: 0.45, ease: "power4.out" }, 0.55);
-      tl.fromTo(".co-card", { opacity: 0, y: 64, scale: 0.93 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.09 }, 2.1);
-      tl.fromTo("#s1-res", { opacity: 0, y: 42 },
-        { opacity: 1, y: 0, duration: 0.5 }, 6.7);
-      tl.fromTo("#s1 .tick", { opacity: 0, scale: 0.35 },
-        { opacity: 1, scale: 1, duration: 0.34, stagger: 0.06 }, 7.35);
+      tl.fromTo("#s1-k", { opacity: 0, y: -18, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5 }, 0.3);
+      tl.fromTo("#s1-code", { opacity: 0, y: 40, filter: "blur(14px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.75 }, 0.7);
+      tl.fromTo(".co-card", { opacity: 0, y: 58, scale: 0.9, filter: "blur(10px)" },
+        { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.6, stagger: 0.1 }, 2.3);
+      tl.fromTo("#s1-res", { opacity: 0, y: 34, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 6.7);
+      tl.fromTo("#s1 .tick", { opacity: 0, scale: 0.3 },
+        { opacity: 1, scale: 1, duration: 0.5, stagger: 0.07, ease: "back.out(2.4)" }, 7.4);
 
       /* ---------- F2 · 12–30 three stat cards ---------- */
       const c1 = { v: 0 }, c2 = { v: 0 };
       const e1 = document.getElementById("c1"), e2 = document.getElementById("c2");
-      tl.fromTo("#s2a", { opacity: 0, y: 72 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 12.4);
-      tl.fromTo(c1, { v: 0 }, { v: 58, duration: 1.6, ease: "power3.out",
+      tl.fromTo("#s2a", { opacity: 0, y: 64, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 12.4);
+      tl.fromTo(c1, { v: 0 }, { v: 58, duration: 1.8, ease: "power4.out",
         onUpdate: () => { e1.textContent = Math.round(c1.v); } }, 12.7);
-      tl.fromTo("#s2a .stat-num", { scale: 0.5 }, { scale: 1, duration: 1.6 }, 12.7);
+      tl.fromTo("#s2a .stat-num", { scale: 0.45 }, { scale: 1, duration: 1.8 }, 12.7);
 
-      tl.fromTo("#s2b", { opacity: 0, y: 72 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 17.6);
-      tl.fromTo(c2, { v: 0 }, { v: 121, duration: 1.6, ease: "power3.out",
+      tl.fromTo("#s2b", { opacity: 0, y: 64, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 17.6);
+      tl.fromTo(c2, { v: 0 }, { v: 121, duration: 1.8, ease: "power4.out",
         onUpdate: () => { e2.textContent = Math.round(c2.v); } }, 17.9);
-      tl.fromTo("#s2b .stat-num", { scale: 0.5 }, { scale: 1, duration: 1.6 }, 17.9);
+      tl.fromTo("#s2b .stat-num", { scale: 0.45 }, { scale: 1, duration: 1.8 }, 17.9);
 
-      tl.fromTo("#s2c", { opacity: 0, y: 72 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 23.2);
-      tl.fromTo("#s2c .rho", { opacity: 0, scale: 0.6 },
-        { opacity: 1, scale: 1, duration: 0.6 }, 23.6);
+      tl.fromTo("#s2c", { opacity: 0, y: 64, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 23.2);
+      tl.fromTo("#s2c .rho", { opacity: 0, scale: 0.55 },
+        { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(2.2)" }, 23.6);
 
       /* ---------- F3 · 30–45 mode rashomon ---------- */
-      tl.fromTo("#s3p", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 30.4);
-      tl.fromTo("#s3p .mode", { opacity: 0, y: 34 },
-        { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: "power4.out" }, 30.95);
-      tl.fromTo("#s3chip", { opacity: 0, y: 28 },
-        { opacity: 1, y: 0, duration: 0.4 }, 32.3);
-      tl.fromTo("#s3p .on-tag", { opacity: 0, scale: 0.7 },
-        { opacity: 1, scale: 1, duration: 0.45 }, 33.1);
+      tl.fromTo("#s3p", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 30.4);
+      tl.fromTo("#s3p .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 30.8);
+      tl.fromTo("#s3p .mode", { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.09 }, 31.0);
+      tl.fromTo("#s3chip", { opacity: 0, y: 22, scale: 0.94 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 32.4);
+      tl.fromTo("#s3p .on-tag", { opacity: 0, scale: 0.6 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.6)" }, 33.2);
 
       /* ---------- F4 · 45–65 five isolated readers ---------- */
-      tl.fromTo("#s4fork", { opacity: 0, y: -24 },
-        { opacity: 1, y: 0, duration: 0.4, ease: "power4.out" }, 45.2);
-      tl.fromTo(".w2", { opacity: 0, y: 74, scale: 0.92 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.09 }, 45.6);
-      tl.fromTo("#s4v", { opacity: 0, y: -24 },
-        { opacity: 1, y: 0, duration: 0.4 }, 56.6);
+      tl.fromTo("#s4fork", { opacity: 0, y: -20, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.55 }, 45.2);
+      tl.fromTo(".w2", { opacity: 0, y: 66, scale: 0.9, filter: "blur(12px)" },
+        { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.6, stagger: 0.1 }, 45.7);
+      tl.fromTo("#s4v", { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }, 56.6);
 
       /* ---------- F5 · 65–80 make score ---------- */
       const c5 = { v: 0 };
       const e5 = document.getElementById("c5");
-      tl.fromTo("#s5p", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 65.4);
-      tl.fromTo(c5, { v: 0 }, { v: 47, duration: 1.7, ease: "power3.out",
+      tl.fromTo("#s5p", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 65.4);
+      tl.fromTo("#s5p .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 65.8);
+      tl.fromTo(c5, { v: 0 }, { v: 47, duration: 1.8, ease: "power4.out",
         onUpdate: () => { e5.textContent = Math.round(c5.v); } }, 65.9);
-      tl.fromTo("#c5", { scale: 0.55 }, { scale: 1, duration: 1.7 }, 65.9);
-      tl.fromTo("#s5bar", { scaleX: 0 }, { scaleX: 0.47, duration: 1.7 }, 65.9);
-      tl.fromTo("#s5badge", { opacity: 0, scale: 0.7 },
-        { opacity: 1, scale: 1, duration: 0.45 }, 68.1);
+      tl.fromTo("#c5", { scale: 0.5 }, { scale: 1, duration: 1.8 }, 65.9);
+      tl.fromTo("#s5bar", { scaleX: 0 }, { scaleX: 0.47, duration: 1.8, ease: "power4.out" }, 65.9);
+      tl.fromTo("#s5badge", { opacity: 0, scale: 0.65 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.4)" }, 68.3);
 
       /* ---------- F6 · 80–95 make history ---------- */
-      tl.fromTo("#s6p", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 80.4);
-      tl.fromTo("#s6p .commit", { opacity: 0, y: 54 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.13, ease: "power4.out" }, 80.95);
-      tl.fromTo("#s6p .hist-foot", { opacity: 0, y: 26 },
-        { opacity: 1, y: 0, duration: 0.5 }, 84.6);
+      tl.fromTo("#s6p", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 80.4);
+      tl.fromTo("#s6p .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 80.8);
+      tl.fromTo("#s6p .commit", { opacity: 0, y: 46, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.55, stagger: 0.14 }, 81.0);
+      tl.fromTo("#s6p .hist-foot", { opacity: 0, y: 22 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "back.out(1.4)" }, 84.8);
 
       /* ---------- F7 · 95–120 clarifier + equiv ---------- */
       const c7 = { v: 0 };
       const e7 = document.getElementById("c7");
-      tl.fromTo("#s7a", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 95.3);
-      tl.fromTo("#s7b", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 104.2);
-      tl.fromTo(c7, { v: 0 }, { v: 15, duration: 1.3, ease: "power3.out",
+      tl.fromTo("#s7a", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 95.3);
+      tl.fromTo("#s7a .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 95.7);
+      tl.fromTo("#s7b", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 104.2);
+      tl.fromTo("#s7b .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 104.6);
+      tl.fromTo(c7, { v: 0 }, { v: 15, duration: 1.5, ease: "power4.out",
         onUpdate: () => { e7.textContent = Math.round(c7.v); } }, 104.7);
-      tl.fromTo("#c7", { scale: 0.6 }, { scale: 1, duration: 1.3 }, 104.7);
+      tl.fromTo("#c7", { scale: 0.55 }, { scale: 1, duration: 1.5 }, 104.7);
 
       /* ---------- F8 · 120–135 rewatch + PR comment ---------- */
-      tl.fromTo("#s8a", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 120.4);
-      tl.fromTo("#s8b", { opacity: 0, x: -44, scale: 0.94 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.55 }, 123.4);
+      tl.fromTo("#s8a", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 120.4);
+      tl.fromTo("#s8a .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 120.8);
+      tl.fromTo("#s8b", { opacity: 0, x: -56, filter: "blur(16px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.75 }, 123.4);
+      tl.fromTo("#s8b .rule", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "power3.out" }, 123.8);
 
       /* ---------- F9 · 135–165 leaderboard ---------- */
-      tl.fromTo("#s9scrim", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 135.2);
-      tl.fromTo("#s9head", { opacity: 0, y: 46 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power4.out" }, 135.5);
-      tl.fromTo("#s9 .lb-row", { opacity: 0, y: 56 },
-        { opacity: 1, y: 0, duration: 0.45, stagger: 0.1, ease: "power4.out" }, 136.3);
+      tl.fromTo("#s9scrim", { opacity: 0 }, { opacity: 1, duration: 0.7 }, 135.2);
+      tl.fromTo("#s9head", { opacity: 0, y: 40, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 135.5);
+      tl.fromTo("#s9 .lb-row", { opacity: 0, y: 48, filter: "blur(10px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.55, stagger: 0.11 }, 136.3);
       tl.fromTo("#s9 .lb-bar span", { scaleX: 0 },
-        { scaleX: 1, duration: 0.9, stagger: 0.1 }, 136.8);
-      tl.fromTo("#s9rho", { opacity: 0, y: 32 },
-        { opacity: 1, y: 0, duration: 0.55 }, 142.2);
-      tl.fromTo("#s9foot", { opacity: 0, y: 26 },
-        { opacity: 1, y: 0, duration: 0.5 }, 145.4);
+        { scaleX: 1, duration: 1.1, stagger: 0.11, ease: "power4.out" }, 136.8);
+      tl.fromTo("#s9rho", { opacity: 0, y: 26, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 142.4);
+      tl.fromTo("#s9foot", { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "back.out(1.3)" }, 145.6);
 
       /* ---------- F10 · 165–180 title card ---------- */
-      tl.fromTo("#s10-title", { opacity: 0, y: 84 },
-        { opacity: 1, y: 0, duration: 0.42, ease: "power4.out" }, 165.4);
-      tl.fromTo("#s10-w1", { opacity: 0, y: 46 },
-        { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, 165.8);
-      tl.fromTo("#s10-w2", { opacity: 0, y: 46 },
-        { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, 166.02);
-      tl.fromTo("#s10-w3", { opacity: 0, y: 46 },
-        { opacity: 1, y: 0, duration: 0.3, ease: "power4.out" }, 166.2);
-      tl.fromTo("#s10-w4", { opacity: 0, y: 52 },
-        { opacity: 1, y: 0, duration: 0.32, ease: "power4.out" }, 166.34);
-      tl.fromTo("#s10-foot", { opacity: 0, y: 26 },
-        { opacity: 1, y: 0, duration: 0.55 }, 167.8);
+      tl.fromTo("#s10-title", { opacity: 0, y: 70, scale: 1.1, filter: "blur(18px)" },
+        { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.9 }, 165.4);
+      tl.fromTo("#s10-w1", { opacity: 0, y: 34, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5 }, 166.0);
+      tl.fromTo("#s10-w2", { opacity: 0, y: 34, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5 }, 166.24);
+      tl.fromTo("#s10-w3", { opacity: 0, y: 34, filter: "blur(8px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5 }, 166.48);
+      tl.fromTo("#s10-w4", { opacity: 0, y: 40, filter: "blur(10px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.6 }, 166.72);
+      tl.fromTo("#s10-foot", { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.3)" }, 168.0);
 
       window.__timelines["main"] = tl;
       tl.seek(0);

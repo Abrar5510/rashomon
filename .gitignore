@@ -144,3 +144,6 @@ rashomon_out/
 
 # tool scratch
 .mimocode/
+
+# compiled window recorder (source is scripts/record_window.swift)
+scripts/record_window

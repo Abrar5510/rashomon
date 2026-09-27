@@ -1,0 +1,1 @@
+Nine of nine functions here carry a boundary-bug fix, and they still mislead readers. Fixing the bug never fixed the confusion. The confusion was never in the behaviour. It was in the code.

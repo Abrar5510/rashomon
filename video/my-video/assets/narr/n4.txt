@@ -1,0 +1,1 @@
+Five readers fork their own context, so they cannot influence each other. No groupthink. Each gets exactly one tool call: read the function, predict what it returns, then stop. They never see the real output, each other, or the answer key.

@@ -1,0 +1,1 @@
+This is Bob. The rashomon mode picks up one witness packet: the function, its probe inputs, and nothing else. No answers, no history, no hint of what the right output looks like.

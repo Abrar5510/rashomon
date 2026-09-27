@@ -1,0 +1,1 @@
+Thirty functions from a real library, ranked by how often independent readers disagree, and every row carries its own bug-fix history. The correlation with past fixes is not zero: point three nine, with a p-value of point naught three. The top row misleads every reader and has three historical bug fixes. Readability is now a number you can regress on.
