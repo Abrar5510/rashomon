@@ -13,6 +13,8 @@ because **the interpreter is the ground truth**.
 
 Tagline: *CRUXEval uses code to grade models. Rashomon uses models to grade code.*
 
+**Live:** https://rashomon-iota.vercel.app · **Repo:** https://github.com/Abrar5510/rashomon
+
 ---
 
 ## Quick start
@@ -227,9 +229,12 @@ check runs entirely in the browser and stores nothing. Serve it anywhere:
 
 ```bash
 make web                                # local
-make deploy                             # Vercel production (needs `vercel login`)
+make deploy                             # Vercel production (project `rashomon`, logged in)
 # or push web/ to GitHub Pages, or npx serve web
 ```
+
+**Shipped:** https://rashomon-iota.vercel.app (Vercel production alias). Redeploy
+after editing `web/`: `cd web && vercel deploy --prod`.
 
 ## See also
 

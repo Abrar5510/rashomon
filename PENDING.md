@@ -34,7 +34,7 @@ submission by hand. Also match `docs/VIDEO.md`'s naming (`taskNN_<desc>`) when c
 | B2 | `.bob/skills/*/SKILL.md` front matter | `name` + `description` present as Bob requires. **Loaded and verified** — the skill fires in a task (`bob_sessions/01_smoke_rashomon_skill.png`) and the Skills list renders. |
 | B3 | `.github/workflows/rashomon.yml` | Written (PR trigger + `/rashomon` comment trigger, pick → probes → witness → score → gate → comment → artifact). **Never run** — no repo, no `ANTHROPIC_API_KEY` secret, no `gh` verification. Treat as a draft. |
 | B4 | **Bob Shell (`bob run --mode rashomon`) integration** | **Not wired up.** `bob` is not on PATH here, so nothing shells out to it. The gate is a *local* `make gate` (Python + `--comment-file`) instead. Add `bob run` only after `bob run --format json --max-cost …` is confirmed to work. |
-| B5 | **Vercel / GitHub Pages deployment** | `make deploy` is wired (`cd web && vercel deploy --prod`), but **not executed**: `vercel` is installed with no valid credentials and the device-code login failed twice — first with a stale code, then with `configuration error with this app`. GitHub Pages would work (`gh` is authenticated with `repo`) but needs a public repo push. | `vercel login` from a normal terminal (not the device flow), or `vercel login <email>`, then `make deploy`. Or create a token at vercel.com/account/settings/tokens and run `make deploy VERCEL_TOKEN=…`. |
+| B5 | **Vercel / GitHub Pages deployment** | **DONE 27 Sep.** The device-flow retry succeeded: CLI authenticated as `abrar5510`, linked as project `rashomon`, `vercel deploy --prod` from `web/`. **Live: https://rashomon-iota.vercel.app** (alias of the `abrars-projects-220cba4c/rashomon` production deployment) — all assets 200, `data.json` serves 30 fns with `"session": "live"`. GitHub repo homepage set to the same URL. | Redeploy: `cd web && vercel deploy --prod`. The CLI's "connect a Git repository" auto-deploy offer was skipped (dashboard-level setup, optional). |
 | B6 | `targets/boltons` clone | Present at `4e5faa3d`, git-ignored, `.bobignore`d. Re-create with `git clone https://github.com/mahmoud/boltons targets/boltons && git -C targets/boltons checkout 4e5faa3d`. |
 | B7 | MIT `LICENSE` copyright line | Placeholder `Rashomon contributors` — **decided to keep** (no personal data in a public repo). No action needed. |
 
@@ -88,10 +88,13 @@ submission by hand. Also match `docs/VIDEO.md`'s naming (`taskNN_<desc>`) when c
    to subagents — hence witnesses are `explore` presets restricted by `.bobignore`
    rather than a "witness mode". That matches the researched correction, but it was
    not confirmed by running Bob.
-5. **Which repo to publish under.** The plan says a new public repo created from
-   `watsonxhackathon/ibm-hackathon-template`, with template ignore files left
-   unmodified above their marker. This build lives in `projects/Bob` and was not
-   pushed anywhere.
+5. **Which repo to publish under.** **Resolved 27 Sep:** created as
+   **`https://github.com/Abrar5510/rashomon`** from
+   `watsonxhackathon/ibm-hackathon-template` (template link recorded on the repo);
+   template `.gitignore` / `.bobignore` kept unmodified above their
+   `DO NOT REMOVE ABOVE PATTERNS` markers with project patterns appended below,
+   template's `.env.example` + `SECURITY.MD` carried over, project README kept.
+   Pushed with full history (`b363791` merge of the template baseline).
 
 ---
 
