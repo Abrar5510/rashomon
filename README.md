@@ -18,7 +18,7 @@ Tagline: *CRUXEval uses code to grade models. Rashomon uses models to grade code
 ## Quick start
 
 ```bash
-make check      # 41 tests
+make check      # 43 tests
 make demo       # end-to-end on the bundled demo repo, offline
 make web        # serve the leaderboard at http://localhost:8000
 make spike      # what can be verified without the Bob IDE, and what to do inside it
@@ -27,6 +27,18 @@ make spike      # what can be verified without the Bob IDE, and what to do insid
 `make demo` runs the whole pipeline — pick → probes → 5 witnesses → score →
 git history → leaderboard — on `demo/target_repo` using a **recorded** witness
 session, so it needs no API key and no network.
+
+Live run with real model witnesses (provider `auto` picks the first key it
+finds — Anthropic, OpenAI, or Google/Gemini; Gemini defaults to
+`gemini-3.5-flash-lite` because the flagship `gemini-3.8-flash` free tier is
+only 20 requests/day):
+
+```bash
+export GOOGLE_API_KEY=…            # or ANTHROPIC_API_KEY / OPENAI_API_KEY
+make witness ROOT=targets/boltons OUT=out/boltons WITNESS_BACKEND=llm
+make score   ROOT=targets/boltons OUT=out/boltons
+make leaderboard ROOT=targets/boltons OUT=out/boltons WEBDATA=out/boltons/data.json
+```
 
 Real run on a real library:
 
@@ -37,7 +49,7 @@ make boltons    # extract + probes + prune + packets + history on targets/bolton
 then score it with witnesses, either from Bob (below) or from a model API:
 
 ```bash
-make witness ROOT=targets/boltons OUT=out/boltons WITNESS_BACKEND=llm   # needs ANTHROPIC_API_KEY
+make witness ROOT=targets/boltons OUT=out/boltons WITNESS_BACKEND=llm   # provider auto: GOOGLE_/ANTHROPIC_/OPENAI_API_KEY
 make score   ROOT=targets/boltons OUT=out/boltons
 make history ROOT=targets/boltons OUT=out/boltons
 make leaderboard ROOT=targets/boltons OUT=out/boltons
@@ -134,6 +146,30 @@ targets/boltons      cloned target library @ 4e5faa3d (git-ignored)
 Makefile             demo, run, extract, probes, packet, witness, merge, score,
                      history, stats, leaderboard, brief, clarify, equiv, rewatch,
                      seal, lift, gate, boltons, spike, check, web, deploy, clean
+```
+
+## Results (live run — what the site ships)
+
+Five independent readers (`gemini-3.5-flash-lite`, temperature 0) predicting
+what **30 boltons functions** return — 410 predictions, `"session": "live"`:
+
+- labels: **9 Consensus misread · 4 Scattered · 17 Clear**
+- the worst are side-effecting / stateful APIs: `OrderedMultiDict.iteritems`,
+  `SpooledStringIO.tell`, `Table.to_text`, `get_profile_json` — all
+  **100% misread, 0/5 readers clean**
+- headline: bug-fix history vs misread rate —
+  **Spearman ρ = 0.394, p = 0.031, 95% CI [0.03, 0.71] \*** — functions that
+  accumulate bug fixes really are harder for independent readers to predict.
+  (The offline fixture's ρ was 0.000 by construction; this is the real number.)
+
+```
+$ make stats ROOT=targets/boltons OUT=out/boltons
+         predictor  spearman        p  95% CI
+----------------------------------------------------
+         bug_fixes     0.394   0.0310  [ 0.03,  0.71] *
+  touching_commits     0.057   0.7589  [-0.32,  0.43]
+                loc    -0.193   0.3042  [-0.55,  0.24]
+            branches    -0.183   0.3303  [-0.54,  0.27]
 ```
 
 ## Results (bundled offline demo)

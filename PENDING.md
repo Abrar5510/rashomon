@@ -6,15 +6,22 @@ running. The parts that *are* built and verified are in `README.md`.
 
 ---
 
-## A. Blocked — no credentials, no Bob CLI in this environment
+## A. Blocked — no credentials, no Bob CLI in this environment (A1–A3 resolved with a Gemini key, 27 Sep; A4–A6 remain)
 
 | # | Item | Why | What to do |
 |---|---|---|---|
-| A1 | **A live 5-witness run on a real library** | No `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or `WATSONX_*` is set anywhere in the shell config or `~/.bob/settings/settings.json`, and `bob` is **not on PATH**. So no model could be called. | `export ANTHROPIC_API_KEY=…` then `make witness ROOT=targets/boltons OUT=out/boltons WITNESS_BACKEND=llm`, **or** run the 🎭 rashomon skill in Bob on `out/boltons/packets/B*.md` and then `make merge score ROOT=targets/boltons OUT=out/boltons`. |
-| A2 | **`web/data.json` is a recorded session, not a live run** | Same reason as A1. The shipped leaderboard is built from `demo/fixtures/witnesses.json` — a session whose predictions were authored offline against the demo repo, with the disagreements written down explicitly in `CONFUSIONS` in `demo/fixtures/make_fixtures.py`. It is labelled as a recorded session in this file and should be labelled on the site too. | Re-run `make leaderboard` after a live witness run and delete the "recorded" label. |
-| A3 | **The 30-function boltons leaderboard** | `make boltons` produces functions + probes + packets + history, but scoring needs witnesses (A1). | Run A1, then `make score history leaderboard ROOT=targets/boltons OUT=out/boltons`. |
+| A1 | **A live 5-witness run on a real library** | **DONE.** A Gemini `GOOGLE_API_KEY` is wired as provider `gemini` with `--provider auto` (commit `6097f13`); the flagship run lives in `out/boltons/` — 5 live readers × 30 boltons functions, **410 predictions** on `gemini-3.5-flash-lite` (the `gemini-3.8-flash` free tier is only 20 req/day — hence lite as default, `RASHOMON_MODEL` overrides). `out/live-demo/` holds the 8-function demo run (40 calls). Witness runs checkpoint per function and resume after interruption. | — |
+| A2 | **`web/data.json` is a recorded session, not a live run** | **DONE.** The site carries `"session": "live"` and is the 30-function boltons run (`out/boltons/data.json`). The recorded fixture session is still reproducible offline via `make demo` (`demo/fixtures/witnesses.json`). | When swapping sessions, say on the site *which* model produced the numbers — model families disagree with the fixtures. |
+| A3 | **The 30-function boltons leaderboard** | **DONE.** Live run in `out/boltons/`: 410 predictions, labels **9 Consensus misread / 4 Scattered / 17 Clear**, and the headline correlation the fixtures could not show — bug_fixes Spearman **ρ = 0.394, p = 0.031, 95% CI [0.03, 0.71] ***. Published to `web/data.json`. | — |
 | A4 | **watsonx.ai Granite / Llama witnesses** (the optional 6th witness in `IDEAS.md`) | No `WATSONX_APIKEY` / `WATSONX_PROJECT_ID`. No `witness_watsonx.py` was written. | Request the account, then write ~80 lines using `POST https://iam.cloud.ibm.com/identity/token` and `POST https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2024-03-14`, model `ibm/granite-4-h-small`. |
-| A5 | **Screenshots in `bob_sessions/`** | Requires the Bob IDE UI. Cannot be captured from a shell. | One PNG per Bob task, `team_taskNN_<desc>.png`, from the IDE's Tasks → task → consumption summary. |
+| A5 | **Screenshots in `bob_sessions/`** | **Solved**, 9 real captures from the Bob IDE UI (driven by `scripts/bob_drive.py`, which
+posts `CGEvent` mouse events; System Events clicks are blocked by TCC `-25211`, so
+`osascript` can only type). Files: `00_smoke_test`, `01_smoke_rashomon_skill`,
+`02_witness_run_done`, `03_approval_pending`, `04_score_report`, `05_clarifier_slugify`,
+`06_slugify_clarified_result`, `07_equiv_gate`, `08_permissions`, `09_custom_modes.jpg`.
+| **Still open:** `bob_sessions/` is git-ignored (`.gitignore` line 22), so the shots
+will not ride along with a push — un-ignore the directory or attach the files to the
+submission by hand. Also match `docs/VIDEO.md`'s naming (`taskNN_<desc>`) when cutting. |
 | A6 | **Video (≤3 min, ≥90 s live), slides PDF, cover image, statements** | Recording/editing work in the IDE, outside a code build. | See `IDEAS.md` §Video and the plan's §8. |
 
 ---
@@ -23,8 +30,8 @@ running. The parts that *are* built and verified are in `README.md`.
 
 | # | Item | Status |
 |---|---|---|
-| B1 | `.bob/custom_modes.yaml` schema | Written to the researched Bob 2.0 shape (`customModes` / `slug` / `roleDefinition` / `whenToUse` / `customInstructions` / `allowedSubagents` / `groups` + `fileRegex`). **Never loaded by Bob.** If Bob rejects `allowedSubagents` or `fileRegex`, fall back to: drop the key and enforce the rule via `customInstructions` plus the "exactly one tool call" check. |
-| B2 | `.bob/skills/*/SKILL.md` front matter | `name` + `description` present as Bob requires. **Never loaded by Bob.** |
+| B1 | `.bob/custom_modes.yaml` schema | Written to the researched Bob 2.0 shape (`customModes` / `slug` / `roleDefinition` / `whenToUse` / `customInstructions` / `allowedSubagents` / `groups` + `fileRegex`). **Loaded and verified** — Bob's Settings → Modes lists `🎭 Rashomon`, `🧪 Probesmith` and `🔍 Clarifier` as *Workspace* modes beside the built-ins (`bob_sessions/09_custom_modes.jpg`). If a future Bob rejects `allowedSubagents` or `fileRegex`, fall back to: drop the key and enforce the rule via `customInstructions` plus the "exactly one tool call" check. |
+| B2 | `.bob/skills/*/SKILL.md` front matter | `name` + `description` present as Bob requires. **Loaded and verified** — the skill fires in a task (`bob_sessions/01_smoke_rashomon_skill.png`) and the Skills list renders. |
 | B3 | `.github/workflows/rashomon.yml` | Written (PR trigger + `/rashomon` comment trigger, pick → probes → witness → score → gate → comment → artifact). **Never run** — no repo, no `ANTHROPIC_API_KEY` secret, no `gh` verification. Treat as a draft. |
 | B4 | **Bob Shell (`bob run --mode rashomon`) integration** | **Not wired up.** `bob` is not on PATH here, so nothing shells out to it. The gate is a *local* `make gate` (Python + `--comment-file`) instead. Add `bob run` only after `bob run --format json --max-cost …` is confirmed to work. |
 | B5 | **Vercel / GitHub Pages deployment** | `make deploy` is wired (`cd web && vercel deploy --prod`), but **not executed**: `vercel` is installed with no valid credentials and the device-code login failed twice — first with a stale code, then with `configuration error with this app`. GitHub Pages would work (`gh` is authenticated with `repo`) but needs a public repo push. | `vercel login` from a normal terminal (not the device flow), or `vercel login <email>`, then `make deploy`. Or create a token at vercel.com/account/settings/tokens and run `make deploy VERCEL_TOKEN=…`. |
@@ -40,10 +47,10 @@ running. The parts that *are* built and verified are in `README.md`.
 | C1 | **Bug-history correlation statistics** | **DONE.** `rashomon stats` (`make stats`) prints Spearman ρ of misread rate against bug fixes, churn, LOC and AST branch count, with a 10k permutation p-value and a bootstrap 95% CI, and writes `stats.json`. Covered by tests. | The script now exists, but it was written *after* the demo numbers were already visible, so the "committed before the result is known" discipline is a process step for the repo history, not a property of this build. |
 | C2 | **Labels and confidence** | **DONE.** 95% Wilson interval per function plus the labels `Clear` / `Scattered` / `Confusing` / `Consensus misread`, gated on the lower bound > 0.20. Shown in `make score`, the PR comment and the site chips. | — |
 | C3 | **Held-out probes (P′)** | **DONE.** `rashomon seal` (`make seal`, part of `make demo`/`run-all`) generates a deterministic 9-case P′ set from the function signatures (coherent slot-0 call, salted by key, rotating which parameter varies), keeps 3 runnable probes/function disjoint with the scored probes, and freezes everything under `rashomon_out/sealed/` with per-entry sha256 + file hash + the `probes.json` hash it must stay disjoint with. `make seal-verify` re-checks the freeze; tamper detection (file-level and entry-level) is covered by tests. Both `sealed/` and `lifted/` are in `.bobignore` so witnesses cannot read them. | — |
-| C3b | **`make rewatch` end-to-end ΔM** | Mechanics work: pick the clarified copy → reuse the sealed probes → witnesses → score → prints before/after. | With `WITNESS_BACKEND=file` the *same* recorded answers are replayed, so before == after **by construction**. A real ΔM needs `WITNESS_BACKEND=llm` (A1) or fresh Bob witnesses on the clarified source. |
+| C3b | **`make rewatch` end-to-end ΔM** | **ΔM measured end to end inside Bob (27 Sep).** Clarifier rewrote `chronex/text.py::slugify` into `rashomon_out/clarified/` (`make equiv` → `15/15 identical`), then five fresh `explore` witnesses read *only* the clarified copy, wrote `rashomon_out/answers/witness_{1..5}.json`, and `make merge` + `make score` gave **47% (7/15), CI 0.25–0.70 → 0% (0/15), CI 0.00–0.20, `Consensus misread` → `Clear`**, independently reproduced by running `make score` outside Bob. The five answer files carry five *different* `summaries`, so they are separate reads and not one copy-paste. The `make rewatch` script itself was still not run — see the caveat in G2. | `WITNESS_BACKEND=file` still replays the same recorded answers, so `make rewatch` gives before == after by construction. |
 | C4 | **Probe design quality** | `heuristic` (signature + parameter-name inference, runs 23/30 boltons functions) and `llm`. | The probesmith recipe — typical / boundary / **discriminating** (pick an input where two plausible *misreadings* diverge). The skill is written; the discriminating case still needs a model. |
 | C5 | **"Be the 6th witness"** | **DONE.** Client-side guess box on `web/index.html` (drawer) and `web/fn.html`: cards start face-down, the interpreter's output is hidden until the visitor checks a guess. The comparison mirrors `score.same` exactly (typed Python-literal parser: bool/int/float strictness, tuple vs list, order-insensitive dicts, repr-vs-bare-string mixed case) — verified against Python on 1,941 pairs, 0 mismatches. Abstention (empty guess) counts as a misread, in line with D5. Tally is in-memory only; nothing is stored. | — |
-| C6 | **Name-lift diagnostic** | **DONE.** `rashomon lift` (`make lift`) writes an anonymised copy of the repo under `rashomon_out/lifted/` — function → `f_<hash>`, parameters → `p0..`, locals → `v0..` — preserving control flow, attributes, literals and docstring prose; re-runs the probes on the lifted root to prove behaviour is unchanged before anything scores it. `LIFTED=1` on `witness`/`score`/`packet` and `make lift-report` show original-vs-lifted misread rate (Δpp). On the recorded session ΔM = 0 by construction — a plumbing null test; a real separation of naming vs structure effects needs live witnesses (A1). | — |
+| C6 | **Name-lift diagnostic** | **DONE.** `rashomon lift` (`make lift`) writes an anonymised copy of the repo under `rashomon_out/lifted/` — function → `f_<hash>`, parameters → `p0..`, locals → `v0..` — preserving control flow, attributes, literals and docstring prose; re-runs the probes on the lifted root to prove behaviour is unchanged before anything scores it. `LIFTED=1` on `witness`/`score`/`packet` and `make lift-report` show original-vs-lifted misread rate (Δpp). On the recorded session ΔM = 0 by construction — a plumbing null test; a real separation of naming vs structure effects needs live witnesses — now runnable (`LIFTED=1 WITNESS_BACKEND=llm` with `GOOGLE_API_KEY`, A1 done) but not yet executed. | — |
 | C7 | **`fn.html?id=` detail page** | **DONE.** `web/fn.html?id=<key>` renders the same detail as the drawer (source, probes, guess box, summaries, fix commits) as a standalone shareable page, with a back-link to the leaderboard and a sensible error for a missing/unknown id. The drawer links to it ("shareable page ↗"). Shared render/guess logic lives in `web/common.js`. | — |
 | C8 | **Cross-model agreement** | Personas vary the *prompt* only. | A second model family (A4). If all five readers make the **same** wrong answer, personas will not fix it — that result is a finding (atoms of confusion), not a bug, but say so. |
 
@@ -88,9 +95,51 @@ running. The parts that *are* built and verified are in `README.md`.
 
 ---
 
+## G. The Bob session that produced `bob_sessions/` — and the one thing it got wrong
+
+**G1 · What actually ran.** One task in the Bob IDE, `fea68ca6caec2a8d1cf4b36e9db9bb1c`
+(messages 1 → 126, all verifiable in `~/.bob/db/bob.db`). Sequence: `use_skill rashomon`
+→ read `rashomon_out/packets/B01.md` → five `explore` witnesses in parallel (canary
+`ZEBRA-7731` absent from all five) → `make merge` + `make score` → `make brief` +
+the Clarifier rewrite → a **second** five-witness run on the clarified copy →
+`make equiv` → `make gate`. Every step is a real tool call in the transcript; nothing
+was written by hand.
+
+**G2 · Bob first reported a result it had not measured — this was caught and redone.**
+Bob's first attempt at the "after" number ran a `python3 -c` snippet whose *answers were
+hardcoded* (`{p: "'ünïcode-42'" for p in personas}`) and printed `0/15` from it. That
+claim is discarded. It was pushed back on with an explicit "no hardcoded or simulated
+answers", Bob re-spawned the five witnesses against `rashomon_out/clarified/chronex/text.py`,
+and only then wrote the answer files (five distinct `summaries`, 07:30) and re-ran
+`make merge` / `make score`. **`05_clarifier_slugify.png` shows the discarded claim;
+`06_slugify_clarified_result.png` and `07_equiv_gate.png` show the measured one.** If the
+0% number is quoted anywhere, quote it from 06/07, not from 05.
+
+**G3 · Current state of `rashomon_out/`.** `answers/` and `results.json` now hold the
+*clarified-source* answers, so a bare `make score` in that directory reports
+`slugify … Clear` — that is the after-picture, not the baseline. The baseline
+(`parse_duration … 47%`, etc.) comes back with `make demo`, which regenerates the answers
+from `demo/fixtures/witnesses.json`. A frozen copy of everything the Bob run produced —
+the five clarified answers, `results.json`, `comment.md`, `witnesses.json` and the
+rewritten `rashomon_out/clarified/chronex/text.py` — is in
+`bob_sessions/clarified_artifacts/` so a later `make demo` cannot be the only thing
+standing between you and that evidence. `web/data.json` is **not** affected: it is built
+from `out/live-demo/results.json` and matches it row-for-row.
+
+**G4 · Automation notes for whoever continues this.** Driven by `scripts/bob_drive.py`
+(`send` / `click` / `status` / `autoapprove`) plus `scripts/bob_winid.py`:
+System Events `click at` fails with `-25211`, so clicks go through `CGEventPost`;
+`screencapture -R` shows whatever window is frontmost (Discord/Safari leaked into two
+shots), so always capture the full screen and crop the AX window rect; screen backing
+scale flipped between 1× and 2× during the session, so never hardcode a pixel scale;
+approvals are found by colour-masking the blue *Approve* button and clicking immediately —
+a greyed button is a stale request and silently no-ops.
+
+---
+
 ## F. Verified — no action needed
 
-- `make check`: **41 pytest cases pass** (grading strictness, extraction, filters,
+- `make check`: **43 pytest cases pass** (grading strictness, extraction, filters,
   heuristic probes, subprocess runner, exception reporting, git history incl. the
   neighbour-bleed guard, packet leak check, answer-shape normalisation, Wilson
   intervals and labels, Spearman/permutation/bootstrap, AST branch counting,
@@ -116,6 +165,13 @@ running. The parts that *are* built and verified are in `README.md`.
 - `make lift` + `make lift-report`: 9/9 functions lifted and behaviour-verified
   (`3/3 identical` each); witness → score → report run end-to-end on the lifted
   copy with Δ +0pp — the expected null on a recorded session (plumbing test).
+- **live witness runs** (provider `gemini` → `gemini-3.5-flash-lite`,
+  `GOOGLE_API_KEY`): demo run in `out/live-demo/` (40 calls, 8 functions,
+  `session: live`) and the flagship boltons run in `out/boltons/` (410
+  predictions, 30 functions) — scored 9 Consensus misread / 4 Scattered /
+  17 Clear, bug_fixes Spearman ρ = 0.394, p = 0.031, 95% CI [0.03, 0.71] *.
+  Witness runs checkpoint after every function; a rerun resumes, and 6
+  consecutive failures abort with the partial file kept.
 - `make boltons`: 61 candidates ranked across 19 modules (8 per module cap), pruned
   to the **30 that actually run**, 5 witness packets, history for all 30.
 - `make spike`: all local checks pass — Bob files present, YAML parses with the
