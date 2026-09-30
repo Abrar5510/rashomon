@@ -1,5 +1,6 @@
 let sortKey = "misread_rate";
 let query = "";
+let tooltipEl = null;
 
 const SORTERS = {
   misread_rate: (a, b) => b.misread_rate - a.misread_rate || b.disagreement_max - a.disagreement_max,
@@ -18,8 +19,10 @@ function visible() {
 
 function renderList() {
   const rows = visible();
-  $("#empty").hidden = rows.length > 0;
-  $("#list").innerHTML = rows
+  const listEl = $("#list");
+  const emptyEl = $("#empty");
+  emptyEl.hidden = rows.length > 0;
+  listEl.innerHTML = rows
     .map((f) => {
       const pct = Math.round(f.misread_rate * 100);
       const cleanCls = f.witnesses_correct <= 1 ? "bad" : f.witnesses_correct >= 5 ? "good" : "";
@@ -40,12 +43,44 @@ function renderList() {
   });
 }
 
+function detailHTML(f) {
+  const probes = f.probes.map((p, i) => probeSectionHTML(f, p, i)).join("");
+  const summaries = [...new Set(f.probes.flatMap((p) => p.cards.map((c) => c.summary).filter(Boolean)))]
+    .map((s) => `<li>${esc(s)}</li>`)
+    .join("");
+  const fixes = (f.history?.fix_commits || [])
+    .map((c) => `<li><span class="mono">${esc(c.sha)}</span> ${esc(c.subject)}</li>`)
+    .join("");
+  return `
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <h3>${esc(f.qualname)}</h3>
+        <div class="sub">${esc(f.path)} · ${f.misreads}/${f.predictions} predictions wrong · 95% CI ${(f.ci_lo * 100).toFixed(0)}–${(f.ci_hi * 100).toFixed(0)}% · ${esc(f.label || "")} · ${f.witnesses_correct}/${f.n_witnesses} readers clean</div>
+      </div>
+      <a class="drawer-share" href="./fn.html?id=${encodeURIComponent(f.key)}" target="_blank" rel="noopener">Shareable page ↗</a>
+    </div>
+    <pre>${esc(f.source)}</pre>
+    <p class="guess-lead">Be the 6th witness: predict what the interpreter returns before you look.
+      The five cards flip only after you check — an empty guess counts as an abstention, and abstentions count as misreads.</p>
+    <div class="card-legend" aria-label="Card color legend">
+      <span class="card-legend-item"><span class="card-legend-swatch ok" aria-hidden="true"></span>Green = matched actual run</span>
+      <span class="card-legend-item"><span class="card-legend-swatch no" aria-hidden="true"></span>Red = misread</span>
+    </div>
+    <h4 class="detail-h">What the 5 readers predicted for this input</h4>
+    ${probes}
+    <div class="sixth" id="sixth" hidden></div>
+    <h4 class="detail-h">What the readers said it did</h4>
+    <ul class="summary">${summaries || "<li>(none recorded)</li>"}</ul>
+    <h4 class="detail-h">Bug-fix history (${f.history?.bug_fixes || 0})</h4>
+    <ul class="summary">${fixes || "<li>no fix commits touch this function</li>"}</ul>
+    <a class="share" href="./fn.html?id=${encodeURIComponent(f.key)}">shareable page for this function ↗</a>`;
+}
+
 function openDrawer(key) {
   const f = DATA.functions.find((x) => x.key === key);
   if (!f) return;
   $("#drawer").innerHTML = `
     <button class="close" id="close" aria-label="close">✕</button>
-    <h3>${esc(f.qualname)}</h3>
     ${detailHTML(f)}`;
   $("#drawer").hidden = false;
   $("#backdrop").hidden = false;
@@ -98,17 +133,174 @@ function renderChart() {
     `Pearson r = ${r.toFixed(2)} across ${n} functions (n is small — this is a measurement, not a claim).`;
 }
 
+/* ---- Tooltip System ---- */
+function initTooltips() {
+  const template = document.getElementById("tooltipTemplate");
+  if (!template) return;
+  tooltipEl = template.content.firstElementChild.cloneNode(true);
+  document.body.appendChild(tooltipEl);
+
+  const tooltipTexts = {
+    "misread-rate": "% of predictions that were wrong (abstentions count as wrong)",
+    "ci": "Wilson score interval — lower bound >20% means statistically confusing with 95% confidence",
+    "disagreement": "Average number of distinct answers per probe — higher = readers disagree more",
+    "clean": "Readers who got EVERY probe right (out of 5 total readers)",
+    "bugfixes": "Git commits whose subject matches fix/bug/patch/resolve and whose diff actually changed this function"
+  };
+
+  document.querySelectorAll("[data-tooltip]").forEach((el) => {
+    const key = el.dataset.tooltip;
+    const text = tooltipTexts[key] || "";
+    el.addEventListener("mouseenter", (e) => showTooltip(el, text));
+    el.addEventListener("mouseleave", hideTooltip);
+    el.addEventListener("focus", (e) => showTooltip(el, text));
+    el.addEventListener("blur", hideTooltip);
+  });
+}
+
+function showTooltip(target, text) {
+  if (!tooltipEl || !text) return;
+  tooltipEl.querySelector(".tooltip-content").textContent = text;
+  const rect = target.getBoundingClientRect();
+  tooltipEl.style.left = `${rect.left + rect.width / 2}px`;
+  tooltipEl.style.top = `${rect.top - 8}px`;
+  tooltipEl.dataset.placement = "top";
+  tooltipEl.classList.add("visible");
+}
+
+function hideTooltip() {
+  if (tooltipEl) tooltipEl.classList.remove("visible");
+}
+
+/* ---- Guided Tour ---- */
+const TOUR_STEPS = [
+  {
+    target: "#list .row:first-child",
+    title: "Leaderboard",
+    text: "These are functions ranked by how often readers misread them. Higher misread rate = more confusing code."
+  },
+  {
+    target: "#list .row:first-child",
+    title: "Click a row",
+    text: "Click any row to see the five readers' predictions for that function's test inputs."
+  },
+  {
+    target: ".drawer",
+    title: "Witness cards",
+    text: "Cards flip after you make your own prediction. Green = matched the actual run, Red = misread."
+  },
+  {
+    target: ".guess-input",
+    title: "Be the 6th witness",
+    text: "Predict before you look — type a Python literal (e.g., 42, 'hello', [1,2,3]) and hit Check. Empty guess = abstention = misread."
+  }
+];
+
+function startTour() {
+  if (localStorage.getItem("rashomonTourDone") === "true") return;
+  let currentStep = 0;
+  const overlay = $("#tourOverlay");
+  const stepEl = $("#tourStep");
+  const titleEl = $("#tourTitle");
+  const textEl = $("#tourText");
+  const prevBtn = $("#tourPrev");
+  const nextBtn = $("#tourNext");
+  const doneBtn = $("#tourDone");
+  const closeBtn = stepEl.querySelector(".tour-close");
+
+  function showStep(idx) {
+    const step = TOUR_STEPS[idx];
+    titleEl.textContent = step.title;
+    textEl.textContent = step.text;
+    prevBtn.hidden = idx === 0;
+    nextBtn.hidden = idx === TOUR_STEPS.length - 1;
+    doneBtn.hidden = idx !== TOUR_STEPS.length - 1;
+
+    // Remove previous highlight
+    document.querySelectorAll(".tour-target").forEach(el => el.classList.remove("tour-target"));
+
+    // Highlight target
+    const target = document.querySelector(step.target);
+    if (target) {
+      target.classList.add("tour-target");
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function nextStep() {
+    if (currentStep < TOUR_STEPS.length - 1) {
+      currentStep++;
+      showStep(currentStep);
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 0) {
+      currentStep--;
+      showStep(currentStep);
+    }
+  }
+
+  function finishTour() {
+    localStorage.setItem("rashomonTourDone", "true");
+    overlay.hidden = true;
+    document.querySelectorAll(".tour-target").forEach(el => el.classList.remove("tour-target"));
+  }
+
+  nextBtn.addEventListener("click", nextStep);
+  prevBtn.addEventListener("click", prevStep);
+  doneBtn.addEventListener("click", finishTour);
+  closeBtn.addEventListener("click", finishTour);
+
+  overlay.hidden = false;
+  showStep(0);
+}
+
 async function boot() {
   try {
     await loadData();
   } catch (e) {
     document.querySelector("main").innerHTML =
-      `<p class="empty">Could not load <code>data.json</code>. Run <code>python3 scripts/build_leaderboard.py</code> first.</p>`;
+      `<section class="empty" id="loadError">
+         <div class="empty-state">
+           <div class="empty-icon">⚠️</div>
+           <h3>Could not load data</h3>
+           <p>This is a live demo of the Rashomon pipeline. The leaderboard shows 30 functions from the <code>boltons</code> library analyzed by 5 independent Gemini readers.</p>
+           <p>To run locally: <code>python3 scripts/build_leaderboard.py</code> then <code>npx serve web</code></p>
+         </div>
+       </section>`;
     return;
   }
   meta();
   renderChart();
   renderList();
+  initTooltips();
+
+  // Hero dismiss
+  const hero = $("#hero");
+  const heroDismiss = $("#heroDismiss");
+  if (heroDismiss) {
+    heroDismiss.addEventListener("click", () => {
+      hero.classList.add("dismissed");
+      localStorage.setItem("rashomonHeroDismissed", "true");
+    });
+    if (localStorage.getItem("rashomonHeroDismissed") === "true") {
+      hero.classList.add("dismissed");
+    }
+  }
+
+  // Clear search button
+  const clearSearch = $("#clearSearch");
+  if (clearSearch) {
+    clearSearch.addEventListener("click", () => {
+      $("#search").value = "";
+      query = "";
+      renderList();
+    });
+  }
+
+  // Start tour after a short delay
+  setTimeout(startTour, 500);
 }
 
 $("#search").addEventListener("input", (e) => { query = e.target.value; renderList(); });

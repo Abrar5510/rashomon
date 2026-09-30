@@ -17,13 +17,50 @@
 </header>
 
 <main class="wrap">
+  <!-- Hero / Landing Section -->
+  <section class="hero" id="hero">
+    <h2>What is Rashomon?</h2>
+    <p class="hero-lead">Five AI readers predict what your function returns. We run it. Wrong predictions = confusing code.</p>
+
+    <div class="metrics-explainer" role="region" aria-label="Metric explanations">
+      <div class="metric-card" data-tooltip="misread-rate">
+        <span class="metric-icon">📊</span>
+        <strong>Misread rate</strong>
+        <span class="metric-desc">% of predictions that were wrong (abstentions count as wrong)</span>
+      </div>
+      <div class="metric-card" data-tooltip="ci">
+        <span class="metric-icon">📈</span>
+        <strong>95% CI</strong>
+        <span class="metric-desc">Wilson interval — lower bound >20% = statistically confusing</span>
+      </div>
+      <div class="metric-card" data-tooltip="disagreement">
+        <span class="metric-icon">🤷</span>
+        <strong>Disagreement</strong>
+        <span class="metric-desc">Average distinct answers per probe — higher = readers disagree</span>
+      </div>
+      <div class="metric-card" data-tooltip="clean">
+        <span class="metric-icon">✅</span>
+        <strong>Clean witnesses</strong>
+        <span class="metric-desc">Readers who got EVERY probe right (out of 5)</span>
+      </div>
+      <div class="metric-card" data-tooltip="bugfixes">
+        <span class="metric-icon">🐛</span>
+        <strong>Bug fixes</strong>
+        <span class="metric-desc">Git commits fixing bugs that actually changed this function</span>
+      </div>
+    </div>
+
+    <p class="hero-footnote">Ranked by misread rate. Click any row to see the five readers' predictions and play "Be the 6th witness."</p>
+    <button class="hero-dismiss" id="heroDismiss" aria-label="Dismiss introduction">Got it — show me the leaderboard</button>
+  </section>
+
   <section class="controls">
     <input id="search" type="search" placeholder="filter by name or file…" />
     <div class="sorts" id="sorts">
-      <button data-sort="misread_rate" class="on">misread rate</button>
-      <button data-sort="disagreement_mean">disagreement</button>
-      <button data-sort="bug_fixes">bug fixes</button>
-      <button data-sort="key">name</button>
+      <button data-sort="misread_rate" class="on" title="Misread rate (default)">misread rate</button>
+      <button data-sort="disagreement_mean" title="Average distinct answers per probe">disagreement</button>
+      <button data-sort="bug_fixes" title="Bug-fix commits touching this function">bug fixes</button>
+      <button data-sort="key" title="Alphabetical by qualified name">name</button>
     </div>
   </section>
 
@@ -35,15 +72,62 @@
 
   <section id="list"></section>
 
-  <section class="empty" id="empty" hidden>No functions match.</section>
+  <section class="empty" id="empty" hidden>
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No functions match your filter</h3>
+      <p>Try a different search term or <button id="clearSearch" class="link-btn">clear the filter</button>.</p>
+    </div>
+  </section>
+
+  <!-- Empty state for when data fails to load -->
+  <section class="empty" id="loadError" hidden>
+    <div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <h3>Could not load data</h3>
+      <p>This is a live demo of the Rashomon pipeline. The leaderboard shows 30 functions from the <code>boltons</code> library analyzed by 5 independent Gemini readers.</p>
+      <p>To run locally: <code>python3 scripts/build_leaderboard.py</code> then <code>npx serve web</code></p>
+    </div>
+  </section>
 </main>
 
 <div class="drawer-backdrop" id="backdrop" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="witness cards"></aside>
 
 <footer class="wrap">
+  <nav class="footer-links" aria-label="Footer navigation">
+    <a href="https://github.com/your-org/rashomon" target="_blank" rel="noopener">GitHub repository</a>
+    <span class="footer-sep" aria-hidden="true">·</span>
+    <a href="https://github.com/your-org/rashomon/blob/main/docs/how-it-works.md" target="_blank" rel="noopener">How it works</a>
+    <span class="footer-sep" aria-hidden="true">·</span>
+    <a href="https://github.com/your-org/rashomon/blob/main/docs/api.md" target="_blank" rel="noopener">Documentation</a>
+    <span class="footer-sep" aria-hidden="true">·</span>
+    <a href="./fn.html?id=boltons/dictutils.py::OrderedMultiDict.itervalues">Example function page</a>
+  </nav>
   <p id="foot"></p>
 </footer>
+
+<!-- Tooltip template (hidden, cloned by JS) -->
+<template id="tooltipTemplate">
+  <div class="tooltip" role="tooltip">
+    <div class="tooltip-arrow"></div>
+    <div class="tooltip-content"></div>
+  </div>
+</template>
+
+<!-- Guided tour overlay -->
+<div class="tour-overlay" id="tourOverlay" hidden aria-modal="true" role="dialog" aria-labelledby="tourTitle">
+  <div class="tour-step" id="tourStep">
+    <button class="tour-close" aria-label="Skip tour">✕</button>
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tour-nav">
+      <button class="tour-prev" id="tourPrev" hidden>Back</button>
+      <button class="tour-next" id="tourNext">Next</button>
+      <button class="tour-done" id="tourDone" hidden>Done</button>
+    </div>
+  </div>
+</div>
 
 <script src="./common.js"></script>
 <script src="./app.js"></script>

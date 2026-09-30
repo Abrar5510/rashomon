@@ -4,10 +4,23 @@
 let DATA = null;
 
 const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&", "<": "<", ">": ">", '"': """ }[c]));
 
 const CHIP_CLASS = { "Clear": "good", "Scattered": "muted", "Confusing": "bad", "Consensus misread": "bad" };
 const chipClass = (label) => CHIP_CLASS[label] || "muted";
+
+/* Metric explanations for tooltips */
+const METRIC_EXPLANATIONS = {
+  "misread-rate": "Percentage of predictions that were wrong. Abstentions (empty guesses) count as wrong.",
+  "ci": "Wilson score interval (95% confidence). If the lower bound exceeds 20%, the function is statistically confusing.",
+  "disagreement": "Average number of distinct answers per probe. Higher means the 5 readers disagreed more.",
+  "clean": "Number of readers who got EVERY probe right (out of 5 total readers).",
+  "bugfixes": "Git commits whose subject matches fix/bug/patch/resolve and whose diff actually changed this function."
+};
+
+function getMetricExplanation(key) {
+  return METRIC_EXPLANATIONS[key] || "";
+}
 
 function meta() {
   if (!DATA || !$("#meta")) return;
@@ -32,6 +45,7 @@ function meta() {
 
 async function loadData() {
   const res = await fetch("./data.json", { cache: "no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
   DATA = await res.json();
   return DATA;
 }
@@ -44,8 +58,6 @@ function argText(p) {
 
 /* ---- guessing: mirror rashomon.score.same in the browser ---- */
 
-/* Typed Python-literal parser: {"empty"} for "", {v} for a literal,
-   null when the text is a bare string (mirrors ast.literal_eval failing). */
 function pyParse(raw) {
   const s = String(raw ?? "").trim();
   if (!s) return { empty: true };
@@ -91,7 +103,6 @@ function pyParse(raw) {
           out += String.fromCharCode(parseInt(h, 16));
           i += 4;
         } else if (e === "\n") {
-          /* line continuation */
         } else out += e;
       } else out += s[i++];
     }
@@ -266,7 +277,6 @@ function pyRepr(x) {
   }
 }
 
-/* mirror of rashomon.score.same for two strings */
 function sameAnswer(guess, actual) {
   const g = String(guess ?? "").trim();
   const a = String(actual ?? "").trim();
